@@ -1,0 +1,43 @@
+            /*
+            conn = new NpgsqlConnection(connString);
+            conn.Open();
+
+            NpgsqlDataAdapter da = new NpgsqlDataAdapter("select * from api.salesorder where order_number = '50238';", conn);
+            DataTable so = new DataTable();
+            DataTable sl= new DataTable();
+
+            DataSet sot = new DataSet();
+
+            da.Fill(so);
+
+            da = new NpgsqlDataAdapter("select *, item.description1 from api.salesline left join api.item on salesline.item_number=item.item_number where order_number = '50238';", conn);
+            da.Fill(sl);
+
+
+            sot.Tables.Add(so);
+            sot.Tables[0].TableName = "salesorder";
+            sot.Tables.Add(sl);
+            sot.Tables[1].TableName = "salesline";
+
+
+            reportDocument.SetDataSource(sot);
+            */
+
+            //reportDocument.DataSourceConnections[0].SetConnection("MR420", "masterref420","admin","admin");
+            /*
+            ConnectionInfo reportConnectionInfo = new ConnectionInfo();
+            reportConnectionInfo.ServerName = "MR420";
+            reportConnectionInfo.DatabaseName = "masterref420";
+            reportConnectionInfo.UserID = "admin";
+            reportConnectionInfo.Password = "admin";
+
+            TableLogOnInfo tableLogOnInfo = new TableLogOnInfo();
+            tableLogOnInfo.ConnectionInfo = reportConnectionInfo;
+            */
+            //foreach (Table table in reportDocument.Database.Tables)
+           // {
+                //table.ApplyLogOnInfo(tableLogOnInfo);
+
+                // Apply the schema name to the table's location
+             //   table.Location = "api." + table.Location;
+           // }
