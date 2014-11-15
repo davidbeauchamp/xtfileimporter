@@ -32,25 +32,16 @@ namespace xtfileimporter
 
         #region type map
 
-        // make sure that this enum and the types array line up with each other, and with _importSourceType and _extractSourceType choices
-        enum typeMap
-        {
-            Items = 0,
-            CRMAccounts = 1,
-            SalesOrder = 2,
-            LotSerial = 3,
-            WorkOrder = 4,
-            PurchaseOrder = 5,
-            Vendor = 6, 
-            Contacts = 7, 
-            Invoice = 8, 
-            Project = 9, 
-            Quote = 10,
-            BOM = 11, 
-            Incident = 12
-        };
-
-        string[,] types = new string[,] { {"Items",          "I",        "SELECT item_id FROM item WHERE item_number = :source_number;"},
+        /// <summary>
+        /// Array of supported document types
+        /// </summary>
+        /// <para>Multidimensional array of supported document types. 
+        /// Columns are:
+        /// 0: Document  
+        /// 1: Document Type Abbreviation
+        /// 2: Query to retrieve source id given the document number
+        /// </para>
+        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id FROM item WHERE item_number = :source_number;"},
                                           {"CRMAccounts",   "CRMA",     "SELECT crmacct_id FROM crmacct WHERE crmacct_number = :source_number;"},
                                           {"SalesOrder",    "S",        "SELECT cohead_id FROM cohead WHERE cohead_number = :source_number;"},
                                           {"LotSerial",     "LS",       "SELECT ls_id FROM ls WHERE ls_number = :source_number;"},
@@ -122,8 +113,7 @@ namespace xtfileimporter
         /// <returns>NpgsqlCommand</returns>
         private NpgsqlCommand getSourceCommand(NpgsqlConnection conn)
         {
-            string sourceQuery = types[(int)Enum.Parse(typeof(typeMap), _importSourceType.Text), SOURCEQUERY];
-
+            string sourceQuery = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCEQUERY];
             NpgsqlCommand sourceCommand = new NpgsqlCommand(sourceQuery, conn);
             sourceCommand.Parameters.Add(new NpgsqlParameter("source_number", NpgsqlDbType.Text));
             return sourceCommand;
@@ -134,7 +124,7 @@ namespace xtfileimporter
         /// </summary>
         /// <param name="_fileName">File name to get byte array</param>
         /// <returns>Byte Array</returns>
-        public byte[] fileToByteArray(string _fileName)
+        private byte[] fileToByteArray(string _fileName)
         {
             byte[] _buffer = null;
 
@@ -298,7 +288,7 @@ namespace xtfileimporter
 
         private void main_Load(object sender, EventArgs e)
         {
-            this.Text = "fileimporter " + AssemblyInfo.Version;
+            this.Text = "xtfileimporter " + AssemblyInfo.Version;
             loadSettings();
         }
         private void main_FormClosing(object sender, FormClosingEventArgs e)
@@ -311,7 +301,7 @@ namespace xtfileimporter
         }
         private void _attach_Click(object sender, EventArgs e)
         {
-            attachFiles(types[(int)Enum.Parse(typeof(typeMap), _importSourceType.Text), SOURCETYPE]);
+            attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE]);
         }
         private void _preview_Click(object sender, EventArgs e)
         {
@@ -323,7 +313,7 @@ namespace xtfileimporter
         }
         private void _extract_Click(object sender, EventArgs e)
         {
-            extractFiles(types[(int)Enum.Parse(typeof(typeMap), _extractSourceType.Text), SOURCETYPE]);
+            extractFiles(types[_extractSourceType.Items.IndexOf(_extractSourceType.Text), SOURCETYPE]);
         }
         private void _browseDirectory_Click(object sender, EventArgs e)
         {
