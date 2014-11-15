@@ -7,9 +7,25 @@ xtuple@davidbeauchamp.com
 
 Uses the wonderful [Npgsql -- PostgreSQL provider for .NET](http://npgsql.projects.pgfoundry.org/)
 
-Released to you under the Common Public Attribution License. This basically means you can do
-what you want with it as long as you retain attribution in the source and leave it as an open
-source project. Closed source derivatives available upon request. 
+Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux. 
+
+#Features#
+-- Preview Matching allows you to see results before attempting import.  
+
+-- Includes support for importing, attaching and extracting files from:
+   * Items
+   * CRM Accounts
+   * Sales Order
+   * Lot/Serial
+   * Work Order
+   * Purchase Order
+   * Vendors
+   * Contacts 
+   * Invoice
+   * Project
+   * Quote
+   * BOM 
+   * Incident
 
 #Version 1.0.0.27#
 
@@ -45,3 +61,7 @@ source project. Closed source derivatives available upon request.
    Filename has to be the item number exactly. 
    
 -- Includes support for Exporting files from xTuple ERP Items. 
+
+Released to you under the Common Public Attribution License. This basically means you can do
+what you want with it as long as you retain attribution in the source and leave it as an open
+source project. Closed source derivatives available upon request. 

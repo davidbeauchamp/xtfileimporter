@@ -577,7 +577,7 @@ namespace xtfileimporter
                             Int32 source_id = (Int32)sourceId.ExecuteScalar();
                             row["sourceNumber"] = sourceNumber;
                         }
-                        catch (NullReferenceException)
+                        catch (Exception)
                         {
                             row["sourceNumber"] = null;
                             continue;
