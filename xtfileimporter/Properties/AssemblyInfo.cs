@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyDescription("Imports/Exports files from xTuples document archive")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("xTuple")]
-[assembly: AssemblyProduct("fileimporter")]
+[assembly: AssemblyProduct("xtfileimporter")]
 [assembly: AssemblyCopyright("2013-2014 David Beauchamp")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -30,8 +30,8 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.25")]
-[assembly: AssemblyFileVersion("1.0.0.25")]
+[assembly: AssemblyVersion("1.0.0.26")]
+[assembly: AssemblyFileVersion("1.0.0.26")]
 [assembly: NeutralResourcesLanguageAttribute("en")]
 
 // modified from http://geekswithblogs.net/dbrown/archive/2009/04/06/easy-access-to-assemblyinfo.cs-attributes.aspx
@@ -105,6 +105,12 @@ public static class AssemblyInfo
         }
     }
 
+    /// <summary>
+    /// This method uses reflection to read the compiled date out of the
+    /// executable header. 
+    /// Yeah.
+    /// </summary>
+    /// <returns>DateTime</returns>
     public static System.DateTime getBuildDate()
     {
         string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;

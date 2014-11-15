@@ -25,28 +25,26 @@
             this._preview = new System.Windows.Forms.Button();
             this._previewGrid = new System.Windows.Forms.DataGridView();
             this._recursive = new System.Windows.Forms.CheckBox();
-            this._import = new System.Windows.Forms.Button();
+            this._attach = new System.Windows.Forms.Button();
             this._attachOnly = new System.Windows.Forms.RadioButton();
             this._saveToDb = new System.Windows.Forms.RadioButton();
-            this._purpose = new System.Windows.Forms.ComboBox();
-            this._purposeLit = new System.Windows.Forms.Label();
-            this.inputPathLabel = new System.Windows.Forms.Label();
+            this._importSourceType = new System.Windows.Forms.ComboBox();
+            this._importSourceTypeLit = new System.Windows.Forms.Label();
+            this._inputPathLit = new System.Windows.Forms.Label();
             this._inputPath = new System.Windows.Forms.TextBox();
-            this.inputPathButton = new System.Windows.Forms.Button();
+            this._inputPathChooser = new System.Windows.Forms.Button();
             this._exportTab = new System.Windows.Forms.TabPage();
-            this._previewExtract = new System.Windows.Forms.Button();
-            this._previewExtractGrid = new System.Windows.Forms.DataGridView();
+            this._extractSourceType = new System.Windows.Forms.ComboBox();
             this._extract = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this._extractSourceLit = new System.Windows.Forms.Label();
+            this._outputPathLit = new System.Windows.Forms.Label();
             this._outputPath = new System.Windows.Forms.TextBox();
-            this.button4 = new System.Windows.Forms.Button();
+            this._outputPathChooser = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
+            this._databaseLit = new System.Windows.Forms.Label();
             this._database = new System.Windows.Forms.TextBox();
             this._exit = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
+            this._portLit = new System.Windows.Forms.Label();
             this._port = new System.Windows.Forms.TextBox();
             this._serverLit = new System.Windows.Forms.Label();
             this._server = new System.Windows.Forms.TextBox();
@@ -54,12 +52,12 @@
             this._password = new System.Windows.Forms.TextBox();
             this._userLit = new System.Windows.Forms.Label();
             this._user = new System.Windows.Forms.TextBox();
+            this._browseDirectory = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).BeginInit();
             this._exportTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._previewExtractGrid)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -95,14 +93,14 @@
             this._importTab.Controls.Add(this._preview);
             this._importTab.Controls.Add(this._previewGrid);
             this._importTab.Controls.Add(this._recursive);
-            this._importTab.Controls.Add(this._import);
+            this._importTab.Controls.Add(this._attach);
             this._importTab.Controls.Add(this._attachOnly);
             this._importTab.Controls.Add(this._saveToDb);
-            this._importTab.Controls.Add(this._purpose);
-            this._importTab.Controls.Add(this._purposeLit);
-            this._importTab.Controls.Add(this.inputPathLabel);
+            this._importTab.Controls.Add(this._importSourceType);
+            this._importTab.Controls.Add(this._importSourceTypeLit);
+            this._importTab.Controls.Add(this._inputPathLit);
             this._importTab.Controls.Add(this._inputPath);
-            this._importTab.Controls.Add(this.inputPathButton);
+            this._importTab.Controls.Add(this._inputPathChooser);
             this._importTab.Location = new System.Drawing.Point(4, 22);
             this._importTab.Name = "_importTab";
             this._importTab.Padding = new System.Windows.Forms.Padding(3);
@@ -113,17 +111,17 @@
             // 
             // _attempt
             // 
-            this._attempt.Location = new System.Drawing.Point(387, 99);
+            this._attempt.Location = new System.Drawing.Point(390, 76);
             this._attempt.Name = "_attempt";
             this._attempt.Size = new System.Drawing.Size(150, 23);
             this._attempt.TabIndex = 12;
-            this._attempt.Text = "Attempt Item Match";
+            this._attempt.Text = "Attempt Match";
             this._attempt.UseVisualStyleBackColor = true;
             this._attempt.Click += new System.EventHandler(this._attempt_Click);
             // 
             // _preview
             // 
-            this._preview.Location = new System.Drawing.Point(231, 99);
+            this._preview.Location = new System.Drawing.Point(234, 76);
             this._preview.Name = "_preview";
             this._preview.Size = new System.Drawing.Size(150, 23);
             this._preview.TabIndex = 11;
@@ -137,30 +135,30 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this._previewGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._previewGrid.Location = new System.Drawing.Point(0, 128);
+            this._previewGrid.Location = new System.Drawing.Point(0, 105);
             this._previewGrid.Name = "_previewGrid";
-            this._previewGrid.Size = new System.Drawing.Size(670, 224);
+            this._previewGrid.Size = new System.Drawing.Size(670, 247);
             this._previewGrid.TabIndex = 9;
             // 
             // _recursive
             // 
             this._recursive.AutoSize = true;
-            this._recursive.Location = new System.Drawing.Point(75, 76);
+            this._recursive.Location = new System.Drawing.Point(427, 25);
             this._recursive.Name = "_recursive";
             this._recursive.Size = new System.Drawing.Size(173, 17);
             this._recursive.TabIndex = 8;
             this._recursive.Text = "Recurse through subdirectories";
             this._recursive.UseVisualStyleBackColor = true;
             // 
-            // _import
+            // _attach
             // 
-            this._import.Location = new System.Drawing.Point(75, 99);
-            this._import.Name = "_import";
-            this._import.Size = new System.Drawing.Size(150, 23);
-            this._import.TabIndex = 7;
-            this._import.Text = "Attach Files";
-            this._import.UseVisualStyleBackColor = true;
-            this._import.Click += new System.EventHandler(this._import_Click);
+            this._attach.Location = new System.Drawing.Point(78, 76);
+            this._attach.Name = "_attach";
+            this._attach.Size = new System.Drawing.Size(150, 23);
+            this._attach.TabIndex = 7;
+            this._attach.Text = "Attach Files";
+            this._attach.UseVisualStyleBackColor = true;
+            this._attach.Click += new System.EventHandler(this._attach_Click);
             // 
             // _attachOnly
             // 
@@ -173,7 +171,6 @@
             this._attachOnly.TabStop = true;
             this._attachOnly.Text = "Attach Only";
             this._attachOnly.UseVisualStyleBackColor = true;
-            this._attachOnly.CheckedChanged += new System.EventHandler(this._checkedChanged);
             // 
             // _saveToDb
             // 
@@ -184,64 +181,68 @@
             this._saveToDb.TabIndex = 5;
             this._saveToDb.Text = "Save To Database";
             this._saveToDb.UseVisualStyleBackColor = true;
-            this._saveToDb.CheckedChanged += new System.EventHandler(this._checkedChanged);
             // 
-            // _purpose
+            // _importSourceType
             // 
-            this._purpose.FormattingEnabled = true;
-            this._purpose.Items.AddRange(new object[] {
-            "Items"});
-            this._purpose.Location = new System.Drawing.Point(75, 49);
-            this._purpose.Name = "_purpose";
-            this._purpose.Size = new System.Drawing.Size(153, 21);
-            this._purpose.TabIndex = 4;
-            this._purpose.Text = "Items";
+            this._importSourceType.FormattingEnabled = true;
+            this._importSourceType.Items.AddRange(new object[] {
+            "Items",
+            "CRM Accounts",
+            "Sales Order",
+            "Lot/Serial",
+            "Work Order",
+            "Purchase Order",
+            "Vendor"});
+            this._importSourceType.Location = new System.Drawing.Point(75, 49);
+            this._importSourceType.Name = "_importSourceType";
+            this._importSourceType.Size = new System.Drawing.Size(153, 21);
+            this._importSourceType.TabIndex = 4;
+            this._importSourceType.Text = "Items";
             // 
-            // _purposeLit
+            // _importSourceTypeLit
             // 
-            this._purposeLit.AutoSize = true;
-            this._purposeLit.Location = new System.Drawing.Point(15, 52);
-            this._purposeLit.Name = "_purposeLit";
-            this._purposeLit.Size = new System.Drawing.Size(54, 13);
-            this._purposeLit.TabIndex = 3;
-            this._purposeLit.Text = "Attach To";
+            this._importSourceTypeLit.AutoSize = true;
+            this._importSourceTypeLit.Location = new System.Drawing.Point(15, 52);
+            this._importSourceTypeLit.Name = "_importSourceTypeLit";
+            this._importSourceTypeLit.Size = new System.Drawing.Size(54, 13);
+            this._importSourceTypeLit.TabIndex = 3;
+            this._importSourceTypeLit.Text = "Attach To";
             // 
-            // inputPathLabel
+            // _inputPathLit
             // 
-            this.inputPathLabel.AutoSize = true;
-            this.inputPathLabel.Location = new System.Drawing.Point(3, 26);
-            this.inputPathLabel.Name = "inputPathLabel";
-            this.inputPathLabel.Size = new System.Drawing.Size(66, 13);
-            this.inputPathLabel.TabIndex = 2;
-            this.inputPathLabel.Text = "Source Path";
+            this._inputPathLit.AutoSize = true;
+            this._inputPathLit.Location = new System.Drawing.Point(3, 26);
+            this._inputPathLit.Name = "_inputPathLit";
+            this._inputPathLit.Size = new System.Drawing.Size(66, 13);
+            this._inputPathLit.TabIndex = 2;
+            this._inputPathLit.Text = "Source Path";
             // 
             // _inputPath
             // 
             this._inputPath.Location = new System.Drawing.Point(75, 23);
             this._inputPath.Name = "_inputPath";
             this._inputPath.Size = new System.Drawing.Size(293, 20);
-            this._inputPath.TabIndex = 1;
+            this._inputPath.TabIndex = 5;
             // 
-            // inputPathButton
+            // _inputPathChooser
             // 
-            this.inputPathButton.Location = new System.Drawing.Point(374, 21);
-            this.inputPathButton.Name = "inputPathButton";
-            this.inputPathButton.Size = new System.Drawing.Size(47, 23);
-            this.inputPathButton.TabIndex = 0;
-            this.inputPathButton.Text = "...";
-            this.inputPathButton.UseVisualStyleBackColor = true;
-            this.inputPathButton.Click += new System.EventHandler(this.inputPathButton_Click);
+            this._inputPathChooser.Location = new System.Drawing.Point(374, 21);
+            this._inputPathChooser.Name = "_inputPathChooser";
+            this._inputPathChooser.Size = new System.Drawing.Size(47, 23);
+            this._inputPathChooser.TabIndex = 6;
+            this._inputPathChooser.Text = "...";
+            this._inputPathChooser.UseVisualStyleBackColor = true;
+            this._inputPathChooser.Click += new System.EventHandler(this._inputPathChooser_Click);
             // 
             // _exportTab
             // 
-            this._exportTab.Controls.Add(this._previewExtract);
-            this._exportTab.Controls.Add(this._previewExtractGrid);
+            this._exportTab.Controls.Add(this._browseDirectory);
+            this._exportTab.Controls.Add(this._extractSourceType);
             this._exportTab.Controls.Add(this._extract);
-            this._exportTab.Controls.Add(this.comboBox1);
-            this._exportTab.Controls.Add(this.label2);
-            this._exportTab.Controls.Add(this.label4);
+            this._exportTab.Controls.Add(this._extractSourceLit);
+            this._exportTab.Controls.Add(this._outputPathLit);
             this._exportTab.Controls.Add(this._outputPath);
-            this._exportTab.Controls.Add(this.button4);
+            this._exportTab.Controls.Add(this._outputPathChooser);
             this._exportTab.Location = new System.Drawing.Point(4, 22);
             this._exportTab.Name = "_exportTab";
             this._exportTab.Padding = new System.Windows.Forms.Padding(3);
@@ -250,26 +251,22 @@
             this._exportTab.Text = "Bulk Export Files";
             this._exportTab.UseVisualStyleBackColor = true;
             // 
-            // _previewExtract
+            // _extractSourceType
             // 
-            this._previewExtract.Location = new System.Drawing.Point(267, 76);
-            this._previewExtract.Name = "_previewExtract";
-            this._previewExtract.Size = new System.Drawing.Size(150, 23);
-            this._previewExtract.TabIndex = 11;
-            this._previewExtract.Text = "Preview Files";
-            this._previewExtract.UseVisualStyleBackColor = true;
-            this._previewExtract.Click += new System.EventHandler(this._previewExtract_Click);
-            // 
-            // _previewExtractGrid
-            // 
-            this._previewExtractGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._previewExtractGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._previewExtractGrid.Location = new System.Drawing.Point(0, 105);
-            this._previewExtractGrid.Name = "_previewExtractGrid";
-            this._previewExtractGrid.Size = new System.Drawing.Size(670, 247);
-            this._previewExtractGrid.TabIndex = 9;
+            this._extractSourceType.FormattingEnabled = true;
+            this._extractSourceType.Items.AddRange(new object[] {
+            "Items",
+            "CRM Accounts",
+            "Sales Order",
+            "Lot/Serial",
+            "Work Order",
+            "Purchase Order",
+            "Vendor"});
+            this._extractSourceType.Location = new System.Drawing.Point(111, 49);
+            this._extractSourceType.Name = "_extractSourceType";
+            this._extractSourceType.Size = new System.Drawing.Size(153, 21);
+            this._extractSourceType.TabIndex = 12;
+            this._extractSourceType.Text = "Items";
             // 
             // _extract
             // 
@@ -281,34 +278,23 @@
             this._extract.UseVisualStyleBackColor = true;
             this._extract.Click += new System.EventHandler(this._extract_Click);
             // 
-            // comboBox1
+            // _extractSourceLit
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Items"});
-            this.comboBox1.Location = new System.Drawing.Point(111, 49);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(153, 21);
-            this.comboBox1.TabIndex = 4;
-            this.comboBox1.Text = "Items";
+            this._extractSourceLit.AutoSize = true;
+            this._extractSourceLit.Location = new System.Drawing.Point(34, 52);
+            this._extractSourceLit.Name = "_extractSourceLit";
+            this._extractSourceLit.Size = new System.Drawing.Size(66, 13);
+            this._extractSourceLit.TabIndex = 3;
+            this._extractSourceLit.Text = "Extract From";
             // 
-            // label2
+            // _outputPathLit
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(34, 52);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(66, 13);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Extract From";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(15, 26);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(85, 13);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "Destination Path";
+            this._outputPathLit.AutoSize = true;
+            this._outputPathLit.Location = new System.Drawing.Point(15, 26);
+            this._outputPathLit.Name = "_outputPathLit";
+            this._outputPathLit.Size = new System.Drawing.Size(85, 13);
+            this._outputPathLit.TabIndex = 2;
+            this._outputPathLit.Text = "Destination Path";
             // 
             // _outputPath
             // 
@@ -317,22 +303,22 @@
             this._outputPath.Size = new System.Drawing.Size(293, 20);
             this._outputPath.TabIndex = 1;
             // 
-            // button4
+            // _outputPathChooser
             // 
-            this.button4.Location = new System.Drawing.Point(410, 21);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(47, 23);
-            this.button4.TabIndex = 0;
-            this.button4.Text = "...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this._outputPathChooser.Location = new System.Drawing.Point(410, 21);
+            this._outputPathChooser.Name = "_outputPathChooser";
+            this._outputPathChooser.Size = new System.Drawing.Size(47, 23);
+            this._outputPathChooser.TabIndex = 0;
+            this._outputPathChooser.Text = "...";
+            this._outputPathChooser.UseVisualStyleBackColor = true;
+            this._outputPathChooser.Click += new System.EventHandler(this._outputPathChooser_Click);
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this._databaseLit);
             this.panel1.Controls.Add(this._database);
             this.panel1.Controls.Add(this._exit);
-            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this._portLit);
             this.panel1.Controls.Add(this._port);
             this.panel1.Controls.Add(this._serverLit);
             this.panel1.Controls.Add(this._server);
@@ -346,24 +332,25 @@
             this.panel1.Size = new System.Drawing.Size(678, 69);
             this.panel1.TabIndex = 1;
             // 
-            // label1
+            // _databaseLit
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(194, 38);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 13);
-            this.label1.TabIndex = 12;
-            this.label1.Text = "Database";
+            this._databaseLit.AutoSize = true;
+            this._databaseLit.Location = new System.Drawing.Point(194, 38);
+            this._databaseLit.Name = "_databaseLit";
+            this._databaseLit.Size = new System.Drawing.Size(53, 13);
+            this._databaseLit.TabIndex = 12;
+            this._databaseLit.Text = "Database";
             // 
             // _database
             // 
             this._database.Location = new System.Drawing.Point(250, 35);
             this._database.Name = "_database";
             this._database.Size = new System.Drawing.Size(158, 20);
-            this._database.TabIndex = 11;
+            this._database.TabIndex = 3;
             // 
             // _exit
             // 
+            this._exit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._exit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this._exit.Location = new System.Drawing.Point(594, 7);
             this._exit.Name = "_exit";
@@ -373,21 +360,21 @@
             this._exit.UseVisualStyleBackColor = true;
             this._exit.Click += new System.EventHandler(this._exit_Click);
             // 
-            // label3
+            // _portLit
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(428, 38);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(26, 13);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Port";
+            this._portLit.AutoSize = true;
+            this._portLit.Location = new System.Drawing.Point(428, 38);
+            this._portLit.Name = "_portLit";
+            this._portLit.Size = new System.Drawing.Size(26, 13);
+            this._portLit.TabIndex = 7;
+            this._portLit.Text = "Port";
             // 
             // _port
             // 
             this._port.Location = new System.Drawing.Point(460, 35);
             this._port.Name = "_port";
             this._port.Size = new System.Drawing.Size(100, 20);
-            this._port.TabIndex = 6;
+            this._port.TabIndex = 4;
             this._port.Text = "5432";
             // 
             // _serverLit
@@ -404,7 +391,7 @@
             this._server.Location = new System.Drawing.Point(250, 9);
             this._server.Name = "_server";
             this._server.Size = new System.Drawing.Size(158, 20);
-            this._server.TabIndex = 4;
+            this._server.TabIndex = 2;
             // 
             // _passwordLit
             // 
@@ -420,7 +407,7 @@
             this._password.Location = new System.Drawing.Point(79, 35);
             this._password.Name = "_password";
             this._password.Size = new System.Drawing.Size(100, 20);
-            this._password.TabIndex = 2;
+            this._password.TabIndex = 1;
             // 
             // _userLit
             // 
@@ -438,6 +425,16 @@
             this._user.Size = new System.Drawing.Size(100, 20);
             this._user.TabIndex = 0;
             // 
+            // _browseDirectory
+            // 
+            this._browseDirectory.Location = new System.Drawing.Point(463, 21);
+            this._browseDirectory.Name = "_browseDirectory";
+            this._browseDirectory.Size = new System.Drawing.Size(93, 23);
+            this._browseDirectory.TabIndex = 13;
+            this._browseDirectory.Text = "Browse Directory";
+            this._browseDirectory.UseVisualStyleBackColor = true;
+            this._browseDirectory.Click += new System.EventHandler(this._browseDirectory_Click);
+            // 
             // main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -447,7 +444,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "main";
             this.Text = "File Importer for xTuple";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.renderer_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.main_FormClosing);
             this.Load += new System.EventHandler(this.main_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this._tabs.ResumeLayout(false);
@@ -456,7 +453,6 @@
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).EndInit();
             this._exportTab.ResumeLayout(false);
             this._exportTab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._previewExtractGrid)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -468,7 +464,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button _exit;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label _portLit;
         private System.Windows.Forms.TextBox _port;
         private System.Windows.Forms.Label _serverLit;
         private System.Windows.Forms.TextBox _server;
@@ -476,7 +472,7 @@
         private System.Windows.Forms.TextBox _password;
         private System.Windows.Forms.Label _userLit;
         private System.Windows.Forms.TextBox _user;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label _databaseLit;
         private System.Windows.Forms.TextBox _database;
         private System.Windows.Forms.TabControl _tabs;
         private System.Windows.Forms.TabPage _importTab;
@@ -484,23 +480,22 @@
         private System.Windows.Forms.Button _preview;
         private System.Windows.Forms.DataGridView _previewGrid;
         private System.Windows.Forms.CheckBox _recursive;
-        private System.Windows.Forms.Button _import;
+        private System.Windows.Forms.Button _attach;
         private System.Windows.Forms.RadioButton _attachOnly;
         private System.Windows.Forms.RadioButton _saveToDb;
-        private System.Windows.Forms.ComboBox _purpose;
-        private System.Windows.Forms.Label _purposeLit;
-        private System.Windows.Forms.Label inputPathLabel;
+        private System.Windows.Forms.ComboBox _importSourceType;
+        private System.Windows.Forms.Label _importSourceTypeLit;
+        private System.Windows.Forms.Label _inputPathLit;
         private System.Windows.Forms.TextBox _inputPath;
-        private System.Windows.Forms.Button inputPathButton;
+        private System.Windows.Forms.Button _inputPathChooser;
         private System.Windows.Forms.TabPage _exportTab;
-        private System.Windows.Forms.Button _previewExtract;
-        private System.Windows.Forms.DataGridView _previewExtractGrid;
         private System.Windows.Forms.Button _extract;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label _extractSourceLit;
+        private System.Windows.Forms.Label _outputPathLit;
         private System.Windows.Forms.TextBox _outputPath;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button _outputPathChooser;
+        private System.Windows.Forms.ComboBox _extractSourceType;
+        private System.Windows.Forms.Button _browseDirectory;
 
     }
 }

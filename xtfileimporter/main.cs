@@ -2,28 +2,39 @@
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
-using fileimporter.Properties;
-using System.Collections;
-using System.Collections.Generic;
+using xtfileimporter.Properties;
 using Npgsql;
 using System.IO;
 using NpgsqlTypes;
+using System.Diagnostics;
 
 namespace xtfileimporter
 {
     public partial class main : Form
     {
-        string username;
-        string password;
-        string report;
-        string database;
-        int port;
+        // used for command line arguments
+        // some of it is plumbing for an upcoming build
+        string username = String.Empty;
+        string password = String.Empty;
+        string database = String.Empty;
+        string server = String.Empty;
+        string sourcetype = String.Empty;
+        string targettype = String.Empty;
+        string outputpath = String.Empty;
+        string inputpath = String.Empty;
+        string mode = String.Empty;
+        int port = 0;
         bool headless = false;
-        string connString;
-        DataTable files = new DataTable();
-        Dictionary<string, string> parameters = new Dictionary<string, string>();
-        string errors;
+        bool recursive = false;
 
+        DataTable files = new DataTable();
+        string output = String.Empty;
+
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">arguments as passed in via command line</param>
+        /// <returns>main</returns>
         public main(string[] _args)
         {
             InitializeComponent();
@@ -32,31 +43,73 @@ namespace xtfileimporter
             {
                 if (_args.Length > 0)
                 {
-                    _processArguments(_args);
+                    processArguments(_args);
                 }
+                // prepare the DataTable with the columns we will use
                 files.Columns.Add(new DataColumn("fileName"));
                 files.Columns.Add(new DataColumn("fileNameNoExt"));
                 files.Columns.Add(new DataColumn("filePath"));
-                files.Columns.Add(new DataColumn("itemNumber"));
+                files.Columns.Add(new DataColumn("sourceNumber"));
             }
             catch (Exception e)
             {
                  MessageBox.Show(e.ToString(), "Error Starting file importer");
             }
-
         }
-
-        #region database
-        private string setConnectionString()
-        {
-            connString = "Server=" + _server.Text + ";Port=" + _port.Text + ";User Id=" + _user.Text + ";Password=" + _password.Text + ";Database=" + _database.Text + ";";
-            Console.WriteLine(connString);
-            return connString;
-        }
-        #endregion
 
         #region helper
-        
+
+        /// <summary>
+        /// Method to build the global connection string. Used in case people make changes in between operations
+        /// </summary>
+        /// <returns>string</returns>
+        private string getConnectionString()
+        {
+           return String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};",
+                                _server.Text, _port.Text, _user.Text, _password.Text, _database.Text);
+        }
+
+        /// <summary>
+        /// Method to return a NpgsqlCommand with the right query for the chosen input sourceType
+        /// Only used for file imports, not exports
+        /// </summary>
+        /// <param name="conn">NpgsqlConnection to use for the command</param>
+        /// <returns>NpgsqlCommand</returns>
+        private NpgsqlCommand getSourceCommand(NpgsqlConnection conn)
+        {
+            NpgsqlCommand sourceCommand;
+            string sourceQuery = "";
+
+            switch (_importSourceType.Text)
+            {
+                case "Items":
+                    sourceQuery = "SELECT item_id FROM item WHERE item_number = :source_number;";
+                    break;
+                case "CRM Accounts":
+                    sourceQuery = "SELECT crmacct_id FROM crmacct WHERE crmacct_number = :source_number;";
+                    break;
+                case "Sales Order":
+                    sourceQuery = "SELECT cohead_id FROM cohead WHERE cohead_number = :source_number;";
+                    break;
+                case "Lot/Serial":
+                    sourceQuery = "SELECT ls_id FROM ls WHERE ls_number = :source_number;";
+                    break;
+                case "Work Order":
+                    sourceQuery = "SELECT wo_id FROM wo WHERE wo_number::text = :source_number;";
+                    break;
+                case "Purchase Order":
+                    sourceQuery = "SELECT pohead_id FROM pohead WHERE pohead_number = :source_number;";
+                    break;
+                case "Vendor":
+                    sourceQuery = "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;";
+                    break;
+            }
+
+            sourceCommand = new NpgsqlCommand(sourceQuery, conn);
+            sourceCommand.Parameters.Add(new NpgsqlParameter("source_number", NpgsqlDbType.Text));
+            return sourceCommand;
+        }
+              
         /// <summary>
         /// Method to get byte array from a file
         /// </summary>
@@ -95,47 +148,44 @@ namespace xtfileimporter
         }
 
         /// <summary>
-        /// Method to get strip duplicate values from a string[] array
+        /// Method to get currently chosen source type
         /// </summary>
-        /// <param name="_sourceArray">array containing duplicate values</param>
-        /// <returns>string[]</returns>
-        public string[] removeDuplicates(string[] _sourceArray)
+        /// <param name="cb">Combobox with the users choice</param>
+        /// <returns>string</returns>
+        private string getSourceType(ComboBox cb)
         {
-            string[] uniqueArray = _sourceArray;
-            ArrayList tempList1 = new ArrayList(uniqueArray);
-            ArrayList tempList2 = new ArrayList();
-            foreach (string str in tempList1)
+            switch (cb.Text)
             {
-                if (!tempList2.Contains(str))
-                {
-                    tempList2.Add(str);
-                }
+                case "Items":
+                    return "I";
+                case "CRM Accounts":
+                    return "CRMA";
+                case "Sales Order":
+                    return "S";
+                case "Lot/Serial":
+                    return "LS";
+                case "Work Order":
+                    return "W";
+                case "Purchase Order":
+                    return "P";
+                case "Vendor":
+                    return "V";
             }
-            uniqueArray = tempList2.ToArray(typeof(string)) as string[];
-            return uniqueArray;
+            return String.Empty;
         }
-
-        //alternate way
-        /*
-        public void LoadFile()
-        {
-            FileInfo file = new FileInfo(this.fileUrl);
-            if (!file.Exists)
-            {
-                throw new ArgumentException("file with Url " + this.fileUrl + " could not be found.");
-            }
-            FileStream stream = new FileStream(this.fileUrl, FileMode.Open, FileAccess.Read);
-            this.content = new byte[stream.Length];
-            stream.Read(this.content, 0, this.content.Length);
-            stream.Close();
-        }
-         * */
-
 
         #endregion
-        
+
         #region meta
-        private void _processArguments(string[] args)
+
+        /// <summary>
+        /// Method to pass out any arguments passed via the command line
+        /// should be in the format --argument=value
+        /// --help will display a list of valid arguments
+        /// </summary>
+        /// <param name="args">arguments as passed in from the command line</param>
+        /// <returns>void</returns>
+        private void processArguments(string[] args)
         {
             try
             {
@@ -143,47 +193,42 @@ namespace xtfileimporter
                 {
                     if (s.ToLower().Contains("--help"))
                     {
-                        _showHelp();
+                        showHelp();
                         Environment.Exit(0);
                     }
                     else if (s.ToLower().Contains("--version"))
                     {
-                        _showVersion();
+                        showVersion();
                         Environment.Exit(0);
                     }
                     else if (s.ToLower().Contains("--username="))
                     {
                         this.username = s.Remove(0, 11);
+                        _user.Text = this.username;
                     }
                     else if (s.ToLower().Contains("--password="))
                     {
                         this.password = s.Remove(0, 11);
+                        _password.Text = this.password;
+                    }
+                    else if (s.ToLower().Contains("--server="))
+                    {
+                        this.server = s.Remove(0, 9);
+                        _server.Text = this.server;
                     }
                     else if (s.ToLower().Contains("--database="))
                     {
                         this.database = s.Remove(0, 11);
+                        _database.Text = this.database;
                     }
                     else if (s.ToLower().Contains("--port="))
                     {
-                        this.port = Convert.ToInt16(s.Remove(0, 6));
-                    }
-                    else if (s.ToLower().Contains("--report="))
-                    {
-                        this.report = s.Remove(0, 9);
+                        this.port = Convert.ToInt16(s.Remove(0, 7));
+                        _port.Text = this.port.ToString();
                     }
                     else if (s.ToLower().Contains("--headless"))
                     {
                         this.headless = true;
-                    }
-                    else
-                    {
-                        // we only care if it is in the parameter format
-                        if (s.IndexOf("--") > -1 && s.IndexOf('=') > 0)
-                        {
-                            string argname = s.Substring(s.LastIndexOf('-') + 1, (s.IndexOf('=') - 1) - s.LastIndexOf('-'));
-                            string argvalue = s.Substring(s.IndexOf('=') + 1, s.Length - s.IndexOf('=') - 1);
-                            parameters.Add(argname, argvalue);
-                        }
                     }
                 }
             }
@@ -193,7 +238,7 @@ namespace xtfileimporter
                 Environment.Exit(-1);
             }
         }
-        private void _showHelp()
+        private void showHelp()
         {
             MessageBox.Show(this, @"xTuple File Importer Command Line Arguments" + Environment.NewLine + Environment.NewLine
                       + "--help: Show this message, then exit." + Environment.NewLine
@@ -204,21 +249,13 @@ namespace xtfileimporter
                       + "--port=<PORT>: The PostgreSQL server port for." + Environment.NewLine
                       + "--headless: Forces headless operation.", "fileimporter " + AssemblyInfo.Version);
         }
-        private void _showVersion()
+        private void showVersion()
         {
             MessageBox.Show(this, @"Version: " + AssemblyInfo.Version + " Built On: " + AssemblyInfo.getBuildDate().ToString() + Environment.NewLine
                       + "Written by David Beauchamp" + Environment.NewLine
                       + "david@xtuple.com" + Environment.NewLine, "File importer for xTuple ERP");
         }
-        #endregion
-
-        #region event handlers
-        private void main_Load(object sender, EventArgs e)
-        {
-            this.Text = "fileimporter " + AssemblyInfo.Version;
-            _loadSettings();
-        }
-        private void _loadSettings()
+        private void loadSettings()
         {
             // window location
             if (Settings.Default.WindowLocation != null)
@@ -232,12 +269,7 @@ namespace xtfileimporter
                 this.Size = Settings.Default.WindowSize;
             }
         }
-
-        private void renderer_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            _saveSettings();
-        }
-        private void _saveSettings()
+        private void saveSettings()
         {
             // save window location to app settings
             Settings.Default.WindowLocation = this.Location;
@@ -254,14 +286,45 @@ namespace xtfileimporter
 
             Settings.Default.Save();
         }
+
         #endregion
 
+        #region event handlers
+
+        private void main_Load(object sender, EventArgs e)
+        {
+            this.Text = "fileimporter " + AssemblyInfo.Version;
+            loadSettings();
+        }
+        private void main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            saveSettings();
+        }
         private void _exit_Click(object sender, EventArgs e)
         {
             Environment.Exit(0);
         }
-
-        private void inputPathButton_Click(object sender, EventArgs e)
+        private void _attach_Click(object sender, EventArgs e)
+        {
+            attachFiles(getSourceType(_importSourceType));
+        }
+        private void _preview_Click(object sender, EventArgs e)
+        {
+            previewFiles();
+        }
+        private void _attempt_Click(object sender, EventArgs e)
+        {
+            attemptmatch();
+        }
+        private void _extract_Click(object sender, EventArgs e)
+        {
+            extractFiles(getSourceType(_extractSourceType));
+        }
+        private void _browseDirectory_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer.exe", _outputPath.Text);
+        }
+        private void _inputPathChooser_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fd = new FolderBrowserDialog();
             fd.RootFolder = Environment.SpecialFolder.Desktop;
@@ -270,87 +333,49 @@ namespace xtfileimporter
                 _inputPath.Text = fd.SelectedPath;
             }
         }
-
-        private void _checkedChanged(object sender, EventArgs e)
+        private void _outputPathChooser_Click(object sender, EventArgs e)
         {
-            _import.Text = _saveToDb.Checked ? "Import Files" : "Attach Files";
-        }
-
-        private void _import_Click(object sender, EventArgs e)
-        {
-            switch (_saveToDb.Checked) {
-            case true:
-                saveToDb();
-                break;
-            case false:
-                attachFiles();
-                break;
+            FolderBrowserDialog fd = new FolderBrowserDialog();
+            fd.RootFolder = Environment.SpecialFolder.Desktop;
+            if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                _outputPath.Text = fd.SelectedPath;
             }
         }
 
-        private void attemptmatch()
+        #endregion
+
+        #region main
+
+        /// <summary>
+        /// Method attach files to xTuple ERP documents for the chosen sourceType.
+        /// </summary>
+        /// <param name="sourceType">string source type from documents.cpp in qt-client/widgets</param>
+        /// <returns>void</returns>
+        private void attachFiles(string sourceType)
         {
-            NpgsqlConnection conn = new NpgsqlConnection(setConnectionString());
-            
-            try
-            {
-
-                if (String.IsNullOrEmpty(_inputPath.Text))
-                {
-                    MessageBox.Show("Input path is empty");
-                    return;
-                }
-                else
-                {
-                    conn.Open();
-
-                    NpgsqlCommand itemQry = new NpgsqlCommand("SELECT item_id FROM item WHERE item_number = :item_number;", conn);
-                    itemQry.Parameters.Add(new NpgsqlParameter("item_number", NpgsqlDbType.Text));
-
-                    foreach (DataRow row in files.Rows)
-                    {
-                        string itemNumber = row["fileNameNoExt"].ToString().ToUpper();
-                        itemQry.Parameters["item_number"].Value = itemNumber;
-                        try
-                        {
-                          Int32 item_id = (Int32)itemQry.ExecuteScalar();          
-                        }
-                        catch (NullReferenceException)
-                        {
-                            continue;
-                        }
-                        row["itemNumber"] = itemNumber;
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            finally
-            {
-                files.AcceptChanges();
-                conn.Close();
-                conn.Dispose();
-            }
-
-        }
-
-        private void attachFiles()
-        {
-            errors = "Started " + DateTime.Now + Environment.NewLine;
+            output = "Started " + DateTime.Now + Environment.NewLine;
             string[] filesFound;
+            string insertSourceQuery = "";
+            bool saveToDb = _saveToDb.Checked;
+            Int32 target_id = 0;
+            Int32 source_id = 0;
 
-            
-            Int32 url_id = 0;
-            NpgsqlConnection conn = new NpgsqlConnection(setConnectionString());
-            string insertUrlQuery = "INSERT INTO urlinfo (url_title, url_url) VALUES (:fileName, :filePath) RETURNING url_id;";
-            string insertDocassQuery = "INSERT INTO docass (docass_source_id, docass_source_type, docass_target_id, docass_target_type, docass_purpose) VALUES (:docass_source_id, 'I', :docass_target_id,'URL', 'S');";
+            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
+            if (saveToDb)
+            {
+                insertSourceQuery = "INSERT INTO file (file_title, file_stream, file_descrip) VALUES (:file_title, :file_stream, :file_descrip) RETURNING file_id;";
+            }
+            else
+            {
+                insertSourceQuery = "INSERT INTO urlinfo (url_title, url_url) VALUES (:fileName, :filePath) RETURNING url_id;";
+            }
+
+            string insertDocassQuery = "INSERT INTO docass (docass_source_id, docass_source_type, docass_target_id, docass_target_type, docass_purpose) "
+                                                 +" VALUES (:docass_source_id, :docass_source_type, :docass_target_id, :docass_target_type, 'S');";
 
             try
             {
-
                 if (String.IsNullOrEmpty(_inputPath.Text))
                 {
                     MessageBox.Show("Input path is empty");
@@ -361,38 +386,60 @@ namespace xtfileimporter
                     filesFound = Directory.GetFiles(_inputPath.Text, "*.*", _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
                     conn.Open();
 
-                    NpgsqlCommand command = new NpgsqlCommand(insertUrlQuery, conn);
+                    NpgsqlCommand command = new NpgsqlCommand(insertSourceQuery, conn);
+                    if (saveToDb)
+                    {
+                        command.Parameters.Add(new NpgsqlParameter("file_title", NpgsqlDbType.Text));
+                        command.Parameters.Add(new NpgsqlParameter("file_stream", NpgsqlDbType.Bytea));
+                        command.Parameters.Add(new NpgsqlParameter("file_descrip", NpgsqlDbType.Text));
+                    }
+                    else
+                    {
+                        command.Parameters.Add(new NpgsqlParameter("fileName", NpgsqlDbType.Text));
+                        command.Parameters.Add(new NpgsqlParameter("filePath", NpgsqlDbType.Text));
+                    }
+                    
                     NpgsqlCommand docassCommand = new NpgsqlCommand(insertDocassQuery, conn);
-
-                    command.Parameters.Add(new NpgsqlParameter("fileName", NpgsqlDbType.Text));
-                    command.Parameters.Add(new NpgsqlParameter("filePath", NpgsqlDbType.Text));
-
                     docassCommand.Parameters.Add(new NpgsqlParameter("docass_source_id", NpgsqlDbType.Integer));
+                    docassCommand.Parameters.Add(new NpgsqlParameter("docass_source_type", NpgsqlDbType.Text));
                     docassCommand.Parameters.Add(new NpgsqlParameter("docass_target_id", NpgsqlDbType.Integer));
+                    docassCommand.Parameters.Add(new NpgsqlParameter("docass_target_type", NpgsqlDbType.Text));
 
-                    NpgsqlCommand itemId = new NpgsqlCommand("SELECT item_id FROM item WHERE item_number = :item_number;", conn);
-                    itemId.Parameters.Add(new NpgsqlParameter("item_number", NpgsqlDbType.Text));
+                    docassCommand.Parameters["docass_source_type"].Value = sourceType;
+                    docassCommand.Parameters["docass_target_type"].Value = saveToDb ? "FILE" : "URL";
 
+                    NpgsqlCommand sourceId = getSourceCommand(conn);
+                    
                     foreach (string file in filesFound)
                     {
-                        string itemNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
-                        itemId.Parameters["item_number"].Value = itemNumber;
-                        Int32 item_id = 0;
+                        string sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                        sourceId.Parameters["source_number"].Value = sourceNumber;
+
                         try
                         {
-                            item_id = (Int32)itemId.ExecuteScalar();
+                            source_id = (Int32)sourceId.ExecuteScalar();
                         }
                         catch (NullReferenceException) {
-                            errors += "Item Number " + itemNumber + " not found. " + Environment.NewLine;
+                            output += "Match For Number " + sourceNumber + " not found. " + Environment.NewLine;
                             continue;
                         }
 
-                        command.Parameters["fileName"].Value = Path.GetFileName(file);
-                        command.Parameters["filePath"].Value = "file:" + Path.GetFullPath(file).Replace('\\', '/');
-                        url_id = (Int32)command.ExecuteScalar();
+                        if (saveToDb)
+                        {
+                            command.Parameters["file_title"].Value = sourceNumber;
+                            command.Parameters["file_descrip"].Value = Path.GetFileName(file);
+                            command.Parameters["file_stream"].Value = fileToByteArray(file);
+                        }
+                        else
+                        {
+                            command.Parameters["fileName"].Value = Path.GetFileName(file);
+                            command.Parameters["filePath"].Value = "file:" + Path.GetFullPath(file).Replace('\\', '/');
+                        }
 
-                        docassCommand.Parameters["docass_source_id"].Value = item_id;
-                        docassCommand.Parameters["docass_target_id"].Value = url_id;
+                        target_id = (Int32)command.ExecuteScalar();
+
+                        docassCommand.Parameters["docass_source_id"].Value = source_id;
+                        docassCommand.Parameters["docass_target_id"].Value = target_id;
                         docassCommand.ExecuteScalar();
                     }
                 }
@@ -404,78 +451,52 @@ namespace xtfileimporter
             }
             finally
             {
-                errors += "Completed at " + DateTime.Now;
+                output += "Completed at " + DateTime.Now;
                 conn.Close();
                 conn.Dispose();
                 outputlog ol = new outputlog();
-                ol.setText(errors);
+                ol.setText(output);
                 ol.Show();
             }
 
         }
 
-        private void saveToDb()
+        /// <summary>
+        /// Method to extract files from an xTuple database for chosen sourceType
+        /// </summary>
+        /// <param name="sourceType">string source type from documents.cpp in qt-client/widgets</param>
+        /// <returns>void</returns>
+        private void extractFiles(string sourceType)
         {
-            errors = "Started " + DateTime.Now + Environment.NewLine;
-            string[] filesFound;
+            output = "Started " + DateTime.Now + Environment.NewLine;
+
+            string fileQuery = String.Format("SELECT file_stream, file_descrip, file_title "
+                                            +" FROM docass "
+                                            +" JOIN file ON (docass_target_id = file_id AND docass_target_type = 'FILE') "
+                                            +" WHERE docass_source_type = '{0}';", sourceType);
             
-            Int32 file_id = 0;
-            NpgsqlConnection conn = new NpgsqlConnection(setConnectionString());
-            string insertUrlQuery = "INSERT INTO file (file_title, file_stream, file_descrip) VALUES (:file_title, :file_stream, :file_descrip) RETURNING file_id;";
-            string insertDocassQuery = "INSERT INTO docass (docass_source_id, docass_source_type, docass_target_id, docass_target_type, docass_purpose) VALUES (:docass_source_id, 'I', :docass_target_id, 'FILE', 'S');";
+            DataTable filesToExtract = new DataTable();
+            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
+            NpgsqlDataAdapter da = new NpgsqlDataAdapter(fileQuery, conn);
 
             try
             {
-
-                if (String.IsNullOrEmpty(_inputPath.Text))
+                if (String.IsNullOrEmpty(_outputPath.Text))
                 {
-                    MessageBox.Show("Input path is empty");
+                    MessageBox.Show("Output path is empty");
                     return;
                 }
                 else
                 {
-                    filesFound = Directory.GetFiles(_inputPath.Text, "*.*", _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
                     conn.Open();
+                    da.Fill(filesToExtract);
 
-                    NpgsqlCommand command = new NpgsqlCommand(insertUrlQuery, conn);
-                    NpgsqlCommand docassCommand = new NpgsqlCommand(insertDocassQuery, conn);
-
-                    command.Parameters.Add(new NpgsqlParameter("file_title", NpgsqlDbType.Text));
-                    command.Parameters.Add(new NpgsqlParameter("file_stream", NpgsqlDbType.Bytea));
-                    command.Parameters.Add(new NpgsqlParameter("file_descrip", NpgsqlDbType.Text));
-
-                    docassCommand.Parameters.Add(new NpgsqlParameter("docass_source_id", NpgsqlDbType.Integer));
-                    docassCommand.Parameters.Add(new NpgsqlParameter("docass_target_id", NpgsqlDbType.Integer));
-
-                    NpgsqlCommand itemId = new NpgsqlCommand("SELECT item_id FROM item WHERE item_number = :item_number;", conn);
-                    itemId.Parameters.Add(new NpgsqlParameter("item_number", NpgsqlDbType.Text));
-
-                    foreach (string file in filesFound)
+                    foreach (DataRow row in filesToExtract.Rows)
                     {
-                        string itemNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
-                        itemId.Parameters["item_number"].Value = itemNumber;
-                        Int32 item_id = 0;
-                        try
-                        {
-                            item_id = (Int32)itemId.ExecuteScalar();
-                        }
-                        catch (NullReferenceException)
-                        {
-                            errors += "Item Number " + itemNumber + " not found. " + Environment.NewLine;
-                            continue;
-                        }
-
-                        command.Parameters["file_title"].Value = itemNumber;
-                        command.Parameters["file_descrip"].Value = Path.GetFileName(file);
-                        command.Parameters["file_stream"].Value = fileToByteArray(file);
-                        file_id = (Int32)command.ExecuteScalar();
-
-                        docassCommand.Parameters["docass_source_id"].Value = item_id;
-                        docassCommand.Parameters["docass_target_id"].Value = file_id;
-                        docassCommand.ExecuteScalar();
+                        File.WriteAllBytes(_outputPath.Text + "\\" + row["file_descrip"].ToString().ToUpper(), (byte[])row["file_stream"]);
+                        output += String.Format("Wrote {0} to {1}", row["file_descrip"].ToString().ToUpper(), _outputPath.Text + "\\" + row["file_descrip"].ToString().ToUpper() + Environment.NewLine);
                     }
                 }
-
             }
             catch (Exception e)
             {
@@ -483,17 +504,20 @@ namespace xtfileimporter
             }
             finally
             {
-                errors += "Completed at " + DateTime.Now;
+                output += "Completed at " + DateTime.Now;
                 conn.Close();
                 conn.Dispose();
                 outputlog ol = new outputlog();
-                ol.setText(errors);
+                ol.setText(output);
                 ol.Show();
             }
-
         }
 
-        private void _preview_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Method to preview results of file scan
+        /// </summary>
+        /// <returns>void</returns>
+        private void previewFiles()
         {
             files.Clear();
             string[] filesFound;
@@ -518,43 +542,41 @@ namespace xtfileimporter
             }
         }
 
-        private void _attempt_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Method to attempt finding the source document number from the preview grid to the document within xTuple
+        /// </summary>
+        /// <returns>void</returns>
+        private void attemptmatch()
         {
-            attemptmatch();
-        }
-
-        private void _extract_Click(object sender, EventArgs e)
-        {
-            extractFiles();
-        }
-
-        private void extractFiles()
-        {
-            string fileQuery = "select file_stream, file_descrip, file_title, item_number "
-                                          + " from docass "
-                                          + " join item on (docass_source_id = item_id AND docass_source_type = 'I') "
-                                          + " join file on (docass_target_id = file_id AND docass_target_type = 'FILE')";
-
-            DataTable filesToExtract = new DataTable();
-            NpgsqlConnection conn = new NpgsqlConnection(setConnectionString());
-            NpgsqlDataAdapter da = new NpgsqlDataAdapter(fileQuery, conn);
-
+            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
+            previewFiles();
             try
             {
-
-                if (String.IsNullOrEmpty(_outputPath.Text))
+                if (String.IsNullOrEmpty(_inputPath.Text))
                 {
-                    MessageBox.Show("Output path is empty");
+                    MessageBox.Show("Input path is empty");
                     return;
                 }
                 else
                 {
                     conn.Open();
-                    da.Fill(filesToExtract);
 
-                    foreach (DataRow row in filesToExtract.Rows)
+                    NpgsqlCommand sourceId = getSourceCommand(conn);
+
+                    foreach (DataRow row in files.Rows)
                     {
-                        File.WriteAllBytes(_outputPath.Text + "\\" + row["file_descrip"], (byte[])row["file_stream"]);
+                        string sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
+                        sourceId.Parameters["source_number"].Value = sourceNumber;
+                        try
+                        {
+                            Int32 source_id = (Int32)sourceId.ExecuteScalar();
+                            row["sourceNumber"] = sourceNumber;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            row["sourceNumber"] = null;
+                            continue;
+                        }
                     }
                 }
 
@@ -565,67 +587,13 @@ namespace xtfileimporter
             }
             finally
             {
+                files.AcceptChanges();
                 conn.Close();
                 conn.Dispose();
             }
         }
 
-        private void extractPreview()
-        {
-            string fileQuery = "select item_number, file_descrip, file_title "
-                                + " from docass "
-                                + " join item on (docass_source_id = item_id AND docass_source_type = 'I') "
-                                + " join file on (docass_target_id = file_id AND docass_target_type = 'FILE')";
-
-            DataTable filesToExtract = new DataTable();
-            NpgsqlConnection conn = new NpgsqlConnection(setConnectionString());
-            NpgsqlDataAdapter da = new NpgsqlDataAdapter(fileQuery, conn);
-
-            try
-            {
-
-                if (String.IsNullOrEmpty(_outputPath.Text))
-                {
-                    MessageBox.Show("Output path is empty");
-                    return;
-                }
-                else
-                {
-                    conn.Open();
-                    da.Fill(filesToExtract);
-
-                    if (filesToExtract != null)
-                    {
-                        _previewExtractGrid.DataSource = filesToExtract;
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            finally
-            {
-                conn.Close();
-                conn.Dispose();
-            }
-        }
-
-        private void _previewExtract_Click(object sender, EventArgs e)
-        {
-            extractPreview();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog fd = new FolderBrowserDialog();
-            fd.RootFolder = Environment.SpecialFolder.Desktop;
-            if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                _outputPath.Text = fd.SelectedPath;
-            }
-        }
+        #endregion
 
     }
 }

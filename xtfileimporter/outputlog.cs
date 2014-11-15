@@ -18,7 +18,8 @@ namespace xtfileimporter
 
         public void setText(string text)
         {
-            textBox1.Text = text;
+            output.Text = text;
+            output.ReadOnly = true;
         }
         
         private void _close_Click(object sender, EventArgs e)
@@ -28,7 +29,7 @@ namespace xtfileimporter
 
         private void _clear_Click(object sender, EventArgs e)
         {
-            textBox1.Clear();
+            output.Clear();
         }
     }
 }
