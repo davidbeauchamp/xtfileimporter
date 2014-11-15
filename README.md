@@ -11,6 +11,23 @@ Released to you under the Common Public Attribution License. This basically mean
 what you want with it as long as you retain attribution in the source and leave it as an open
 source project. Closed source derivatives available upon request. 
 
+#Version 1.0.0.27#
+
+-- Replaced redundant code with multidimentional array and enum map
+
+-- Includes support for importing, attaching and extracting files from:
+   * Contacts 
+   * Invoice
+   * Project
+   * Quote
+   * BOM 
+   * Incident
+
+#Version 1.0.0.28+ Roadmap#
+-- Include headless mode
+
+#Older Releases#
+
 #Version 1.0.0.26#
 
 -- Includes support for importing, attaching and extracting files from:
@@ -21,11 +38,6 @@ source project. Closed source derivatives available upon request.
    * Work Order
    * Purchase Order
    * Vendors
-
-#Version 1.0.0.27+ Roadmap#
--- Include headless mode
-
-#Older Releases#
 
 #Version 1.0.0.25 Initial Release#
 

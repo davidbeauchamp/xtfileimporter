@@ -30,6 +30,47 @@ namespace xtfileimporter
         DataTable files = new DataTable();
         string output = String.Empty;
 
+        #region type map
+
+        // make sure that this enum and the types array line up with each other, and with _importSourceType and _extractSourceType choices
+        enum typeMap
+        {
+            Items = 0,
+            CRMAccounts = 1,
+            SalesOrder = 2,
+            LotSerial = 3,
+            WorkOrder = 4,
+            PurchaseOrder = 5,
+            Vendor = 6, 
+            Contacts = 7, 
+            Invoice = 8, 
+            Project = 9, 
+            Quote = 10,
+            BOM = 11, 
+            Incident = 12
+        };
+
+        string[,] types = new string[,] { {"Items",          "I",        "SELECT item_id FROM item WHERE item_number = :source_number;"},
+                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id FROM crmacct WHERE crmacct_number = :source_number;"},
+                                          {"SalesOrder",    "S",        "SELECT cohead_id FROM cohead WHERE cohead_number = :source_number;"},
+                                          {"LotSerial",     "LS",       "SELECT ls_id FROM ls WHERE ls_number = :source_number;"},
+                                          {"WorkOrder",     "W",        "SELECT wo_id FROM wo WHERE wo_number::text = :source_number;"},
+                                          {"PurchaseOrder", "P",        "SELECT pohead_id FROM pohead WHERE pohead_number = :source_number;"},
+                                          {"Vendor",        "V",        "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;"},
+                                          {"Contacts",      "T",        "SELECT cntct_id FROM cntct WHERE cntct_number = :source_number;"},
+                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead WHERE invchead_invcnumber = :source_number;"},
+                                          {"Project",       "J",        "SELECT prj_id FROM prj WHERE prj_number = :source_number;"},
+                                          {"Quote",         "Q",        "SELECT quhead_id FROM quhead WHERE quhead_number = :source_number;"},
+                                          {"BOM",           "BMH",      "SELECT bomhead_id FROM bomhead WHERE bomhead_item_id = getitemid(:source_number);"},
+                                          {"Incident",      "INCDT",    "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;"}};
+
+        // these constants represent the columns in the above types array
+        int SOURCE = 0,
+            SOURCETYPE = 1,
+            SOURCEQUERY = 2;
+
+        #endregion
+
         /// <summary>
         /// Main entry point
         /// </summary>
@@ -45,6 +86,10 @@ namespace xtfileimporter
                 {
                     processArguments(_args);
                 }
+
+                // populate comboboxes
+                addTypeChoices();
+
                 // prepare the DataTable with the columns we will use
                 files.Columns.Add(new DataColumn("fileName"));
                 files.Columns.Add(new DataColumn("fileNameNoExt"));
@@ -77,35 +122,9 @@ namespace xtfileimporter
         /// <returns>NpgsqlCommand</returns>
         private NpgsqlCommand getSourceCommand(NpgsqlConnection conn)
         {
-            NpgsqlCommand sourceCommand;
-            string sourceQuery = "";
+            string sourceQuery = types[(int)Enum.Parse(typeof(typeMap), _importSourceType.Text), SOURCEQUERY];
 
-            switch (_importSourceType.Text)
-            {
-                case "Items":
-                    sourceQuery = "SELECT item_id FROM item WHERE item_number = :source_number;";
-                    break;
-                case "CRM Accounts":
-                    sourceQuery = "SELECT crmacct_id FROM crmacct WHERE crmacct_number = :source_number;";
-                    break;
-                case "Sales Order":
-                    sourceQuery = "SELECT cohead_id FROM cohead WHERE cohead_number = :source_number;";
-                    break;
-                case "Lot/Serial":
-                    sourceQuery = "SELECT ls_id FROM ls WHERE ls_number = :source_number;";
-                    break;
-                case "Work Order":
-                    sourceQuery = "SELECT wo_id FROM wo WHERE wo_number::text = :source_number;";
-                    break;
-                case "Purchase Order":
-                    sourceQuery = "SELECT pohead_id FROM pohead WHERE pohead_number = :source_number;";
-                    break;
-                case "Vendor":
-                    sourceQuery = "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;";
-                    break;
-            }
-
-            sourceCommand = new NpgsqlCommand(sourceQuery, conn);
+            NpgsqlCommand sourceCommand = new NpgsqlCommand(sourceQuery, conn);
             sourceCommand.Parameters.Add(new NpgsqlParameter("source_number", NpgsqlDbType.Text));
             return sourceCommand;
         }
@@ -147,36 +166,22 @@ namespace xtfileimporter
             return _buffer;
         }
 
-        /// <summary>
-        /// Method to get currently chosen source type
-        /// </summary>
-        /// <param name="cb">Combobox with the users choice</param>
-        /// <returns>string</returns>
-        private string getSourceType(ComboBox cb)
-        {
-            switch (cb.Text)
-            {
-                case "Items":
-                    return "I";
-                case "CRM Accounts":
-                    return "CRMA";
-                case "Sales Order":
-                    return "S";
-                case "Lot/Serial":
-                    return "LS";
-                case "Work Order":
-                    return "W";
-                case "Purchase Order":
-                    return "P";
-                case "Vendor":
-                    return "V";
-            }
-            return String.Empty;
-        }
-
         #endregion
 
         #region meta
+
+        /// <summary>
+        /// Adds the available types to the comboboxes
+        /// </summary>
+        /// <returns>void</returns>
+        private void addTypeChoices()
+        {
+            for (int i = 0; i < types.GetLength(0); i += 1 )
+            {
+                _importSourceType.Items.Add(types[i, SOURCE]);
+                _extractSourceType.Items.Add(types[i, SOURCE]);
+            }
+        }
 
         /// <summary>
         /// Method to pass out any arguments passed via the command line
@@ -247,7 +252,7 @@ namespace xtfileimporter
                       + "--password=<PASSWORD>: The PostgreSQL password. Required in headless mode." + Environment.NewLine
                       + "--database=<DATABSE>: The xTuple database you want to import into. Required in headless mode." + Environment.NewLine
                       + "--port=<PORT>: The PostgreSQL server port for." + Environment.NewLine
-                      + "--headless: Forces headless operation.", "fileimporter " + AssemblyInfo.Version);
+                      + "--headless: Forces headless operation.", "xtfileimporter " + AssemblyInfo.Version);
         }
         private void showVersion()
         {
@@ -306,7 +311,7 @@ namespace xtfileimporter
         }
         private void _attach_Click(object sender, EventArgs e)
         {
-            attachFiles(getSourceType(_importSourceType));
+            attachFiles(types[(int)Enum.Parse(typeof(typeMap), _importSourceType.Text), SOURCETYPE]);
         }
         private void _preview_Click(object sender, EventArgs e)
         {
@@ -318,7 +323,7 @@ namespace xtfileimporter
         }
         private void _extract_Click(object sender, EventArgs e)
         {
-            extractFiles(getSourceType(_extractSourceType));
+            extractFiles(types[(int)Enum.Parse(typeof(typeMap), _extractSourceType.Text), SOURCETYPE]);
         }
         private void _browseDirectory_Click(object sender, EventArgs e)
         {
@@ -543,7 +548,7 @@ namespace xtfileimporter
         }
 
         /// <summary>
-        /// Method to attempt finding the source document number from the preview grid to the document within xTuple
+        /// Method to attempt matching the source document number from the preview grid to the document within xTuple
         /// </summary>
         /// <returns>void</returns>
         private void attemptmatch()

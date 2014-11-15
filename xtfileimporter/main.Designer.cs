@@ -34,6 +34,7 @@
             this._inputPath = new System.Windows.Forms.TextBox();
             this._inputPathChooser = new System.Windows.Forms.Button();
             this._exportTab = new System.Windows.Forms.TabPage();
+            this._browseDirectory = new System.Windows.Forms.Button();
             this._extractSourceType = new System.Windows.Forms.ComboBox();
             this._extract = new System.Windows.Forms.Button();
             this._extractSourceLit = new System.Windows.Forms.Label();
@@ -52,7 +53,6 @@
             this._password = new System.Windows.Forms.TextBox();
             this._userLit = new System.Windows.Forms.Label();
             this._user = new System.Windows.Forms.TextBox();
-            this._browseDirectory = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -185,14 +185,6 @@
             // _importSourceType
             // 
             this._importSourceType.FormattingEnabled = true;
-            this._importSourceType.Items.AddRange(new object[] {
-            "Items",
-            "CRM Accounts",
-            "Sales Order",
-            "Lot/Serial",
-            "Work Order",
-            "Purchase Order",
-            "Vendor"});
             this._importSourceType.Location = new System.Drawing.Point(75, 49);
             this._importSourceType.Name = "_importSourceType";
             this._importSourceType.Size = new System.Drawing.Size(153, 21);
@@ -251,17 +243,19 @@
             this._exportTab.Text = "Bulk Export Files";
             this._exportTab.UseVisualStyleBackColor = true;
             // 
+            // _browseDirectory
+            // 
+            this._browseDirectory.Location = new System.Drawing.Point(463, 21);
+            this._browseDirectory.Name = "_browseDirectory";
+            this._browseDirectory.Size = new System.Drawing.Size(93, 23);
+            this._browseDirectory.TabIndex = 13;
+            this._browseDirectory.Text = "Browse Directory";
+            this._browseDirectory.UseVisualStyleBackColor = true;
+            this._browseDirectory.Click += new System.EventHandler(this._browseDirectory_Click);
+            // 
             // _extractSourceType
             // 
             this._extractSourceType.FormattingEnabled = true;
-            this._extractSourceType.Items.AddRange(new object[] {
-            "Items",
-            "CRM Accounts",
-            "Sales Order",
-            "Lot/Serial",
-            "Work Order",
-            "Purchase Order",
-            "Vendor"});
             this._extractSourceType.Location = new System.Drawing.Point(111, 49);
             this._extractSourceType.Name = "_extractSourceType";
             this._extractSourceType.Size = new System.Drawing.Size(153, 21);
@@ -424,16 +418,6 @@
             this._user.Name = "_user";
             this._user.Size = new System.Drawing.Size(100, 20);
             this._user.TabIndex = 0;
-            // 
-            // _browseDirectory
-            // 
-            this._browseDirectory.Location = new System.Drawing.Point(463, 21);
-            this._browseDirectory.Name = "_browseDirectory";
-            this._browseDirectory.Size = new System.Drawing.Size(93, 23);
-            this._browseDirectory.TabIndex = 13;
-            this._browseDirectory.Text = "Browse Directory";
-            this._browseDirectory.UseVisualStyleBackColor = true;
-            this._browseDirectory.Click += new System.EventHandler(this._browseDirectory_Click);
             // 
             // main
             // 
