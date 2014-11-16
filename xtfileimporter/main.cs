@@ -13,6 +13,7 @@ namespace xtfileimporter
 {
     public partial class main : Form
     {
+        #region aguments
         // used for command line arguments
         // some of it is plumbing for an upcoming build
         string username = String.Empty;
@@ -27,8 +28,11 @@ namespace xtfileimporter
         int port = 0;
         bool headless = false;
         bool recursive = false;
+        #endregion
 
+        // used to store the file list
         DataTable files = new DataTable();
+        // string that gets built and displayed at the end of the run
         string output = String.Empty;
 
         #region type map
@@ -41,20 +45,20 @@ namespace xtfileimporter
         /// 0: Document  
         /// 1: Document Type Abbreviation
         /// 2: Query to retrieve source id given the document number
-        /// </para>
-        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id FROM item WHERE item_number = :source_number;"},
-                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id FROM crmacct WHERE crmacct_number = :source_number;"},
-                                          {"SalesOrder",    "S",        "SELECT cohead_id FROM cohead WHERE cohead_number = :source_number;"},
-                                          {"LotSerial",     "LS",       "SELECT ls_id FROM ls WHERE ls_number = :source_number;"},
-                                          {"WorkOrder",     "W",        "SELECT wo_id FROM wo WHERE wo_number::text = :source_number;"},
-                                          {"PurchaseOrder", "P",        "SELECT pohead_id FROM pohead WHERE pohead_number = :source_number;"},
-                                          {"Vendor",        "V",        "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;"},
-                                          {"Contacts",      "T",        "SELECT cntct_id FROM cntct WHERE cntct_number = :source_number;"},
-                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead WHERE invchead_invcnumber = :source_number;"},
-                                          {"Project",       "J",        "SELECT prj_id FROM prj WHERE prj_number = :source_number;"},
-                                          {"Quote",         "Q",        "SELECT quhead_id FROM quhead WHERE quhead_number = :source_number;"},
-                                          {"BOM",           "BMH",      "SELECT bomhead_id FROM bomhead WHERE bomhead_item_id = getitemid(:source_number);"},
-                                          {"Incident",      "INCDT",    "SELECT vend_id FROM vendinfo WHERE vend_number = :source_number;"}};
+        /// </para> 
+        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE item_number           = :source_number;"},
+                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE crmacct_number        = :source_number;"},
+                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE cohead_number         = :source_number;"},
+                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE ls_number             = :source_number;"},
+                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE wo_number::text       = :source_number;"},
+                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE pohead_number         = :source_number;"},
+                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE vend_number           = :source_number;"},
+                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE cntct_number          = :source_number;"},
+                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE invchead_invcnumber   = :source_number;"},
+                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE prj_number            = :source_number;"},
+                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE quhead_number         = :source_number;"},
+                                          {"BOM",           "BMH",      "SELECT bomhead_id  FROM bomhead    WHERE bomhead_item_id       = getitemid(:source_number);"},
+                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE vend_number           = :source_number;"}};
 
         // these constants represent the columns in the above types array
         int SOURCE = 0,
@@ -318,7 +322,14 @@ namespace xtfileimporter
         }
         private void _attempt_Click(object sender, EventArgs e)
         {
-            attemptmatch();
+            new Thread(delegate()
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    attemptmatch();
+                });
+
+            }).Start();
         }
         private void _extract_Click(object sender, EventArgs e)
         {
@@ -380,7 +391,7 @@ namespace xtfileimporter
             }
             else
             {
-                insertSourceQuery = "INSERT INTO urlinfo (url_title, url_url) VALUES (:fileName, :filePath) RETURNING url_id;";
+                insertSourceQuery = "INSERT INTO urlinfo (url_title, url_url) VALUES (:url_title, :url_url) RETURNING url_id;";
             }
 
             string insertDocassQuery = "INSERT INTO docass (docass_source_id, docass_source_type, docass_target_id, docass_target_type, docass_purpose) "
@@ -413,8 +424,8 @@ namespace xtfileimporter
                     }
                     else
                     {
-                        command.Parameters.Add(new NpgsqlParameter("fileName", NpgsqlDbType.Text));
-                        command.Parameters.Add(new NpgsqlParameter("filePath", NpgsqlDbType.Text));
+                        command.Parameters.Add(new NpgsqlParameter("url_title", NpgsqlDbType.Text));
+                        command.Parameters.Add(new NpgsqlParameter("url_url", NpgsqlDbType.Text));
                     }
                     
                     NpgsqlCommand docassCommand = new NpgsqlCommand(insertDocassQuery, conn);
@@ -453,8 +464,8 @@ namespace xtfileimporter
                         }
                         else
                         {
-                            command.Parameters["fileName"].Value = Path.GetFileName(file);
-                            command.Parameters["filePath"].Value = "file:" + Path.GetFullPath(file).Replace('\\', '/');
+                            command.Parameters["url_title"].Value = Path.GetFileName(file);
+                            command.Parameters["url_url"].Value = "file:" + Path.GetFullPath(file).Replace('\\', '/');
                         }
 
                         target_id = (Int32)command.ExecuteScalar();
@@ -592,14 +603,23 @@ namespace xtfileimporter
                 }
                 else
                 {
+                    progress progress = new progress();
+
                     conn.Open();
 
                     NpgsqlCommand sourceId = getSourceCommand(conn);
+
+                    if (files.Rows.Count > 0)
+                    {
+                        progress.setMaxValue(files.Rows.Count);
+                        progress.Show();
+                    }
 
                     foreach (DataRow row in files.Rows)
                     {
                         string sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
                         sourceId.Parameters["source_number"].Value = sourceNumber;
+                        progress.incremenet();
                         try
                         {
                             Int32 source_id = (Int32)sourceId.ExecuteScalar();
@@ -611,6 +631,7 @@ namespace xtfileimporter
                             continue;
                         }
                     }
+                    progress.Close();
                 }
 
             }
