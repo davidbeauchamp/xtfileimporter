@@ -17,7 +17,6 @@
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this._tabs = new System.Windows.Forms.TabControl();
             this._importTab = new System.Windows.Forms.TabPage();
@@ -53,6 +52,8 @@
             this._password = new System.Windows.Forms.TextBox();
             this._userLit = new System.Windows.Forms.Label();
             this._user = new System.Windows.Forms.TextBox();
+            this._mask = new System.Windows.Forms.TextBox();
+            this._maskLit = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -89,6 +90,8 @@
             // 
             // _importTab
             // 
+            this._importTab.Controls.Add(this._maskLit);
+            this._importTab.Controls.Add(this._mask);
             this._importTab.Controls.Add(this._attempt);
             this._importTab.Controls.Add(this._preview);
             this._importTab.Controls.Add(this._previewGrid);
@@ -131,19 +134,23 @@
             // 
             // _previewGrid
             // 
+            this._previewGrid.AllowUserToAddRows = false;
+            this._previewGrid.AllowUserToDeleteRows = false;
             this._previewGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this._previewGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this._previewGrid.Location = new System.Drawing.Point(0, 105);
             this._previewGrid.Name = "_previewGrid";
+            this._previewGrid.ReadOnly = true;
+            this._previewGrid.ShowEditingIcon = false;
             this._previewGrid.Size = new System.Drawing.Size(670, 247);
             this._previewGrid.TabIndex = 9;
             // 
             // _recursive
             // 
             this._recursive.AutoSize = true;
-            this._recursive.Location = new System.Drawing.Point(427, 25);
+            this._recursive.Location = new System.Drawing.Point(456, 50);
             this._recursive.Name = "_recursive";
             this._recursive.Size = new System.Drawing.Size(173, 17);
             this._recursive.TabIndex = 8;
@@ -400,6 +407,7 @@
             // 
             this._password.Location = new System.Drawing.Point(79, 35);
             this._password.Name = "_password";
+            this._password.PasswordChar = '*';
             this._password.Size = new System.Drawing.Size(100, 20);
             this._password.TabIndex = 1;
             // 
@@ -419,13 +427,29 @@
             this._user.Size = new System.Drawing.Size(100, 20);
             this._user.TabIndex = 0;
             // 
+            // _mask
+            // 
+            this._mask.Location = new System.Drawing.Point(489, 23);
+            this._mask.Name = "_mask";
+            this._mask.Size = new System.Drawing.Size(51, 20);
+            this._mask.TabIndex = 13;
+            this._mask.Text = "*.*";
+            // 
+            // _maskLit
+            // 
+            this._maskLit.AutoSize = true;
+            this._maskLit.Location = new System.Drawing.Point(448, 26);
+            this._maskLit.Name = "_maskLit";
+            this._maskLit.Size = new System.Drawing.Size(33, 13);
+            this._maskLit.TabIndex = 14;
+            this._maskLit.Text = "Mask";
+            // 
             // main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 462);
             this.Controls.Add(this.tableLayoutPanel1);
-            //this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "main";
             this.Text = "File Importer for xTuple";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.main_FormClosing);
@@ -480,6 +504,8 @@
         private System.Windows.Forms.Button _outputPathChooser;
         private System.Windows.Forms.ComboBox _extractSourceType;
         private System.Windows.Forms.Button _browseDirectory;
+        private System.Windows.Forms.Label _maskLit;
+        private System.Windows.Forms.TextBox _mask;
 
     }
 }

@@ -396,7 +396,9 @@ namespace xtfileimporter
                 else
                 {
 
-                    filesFound = Directory.GetFiles(_inputPath.Text, "*.*", _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                    filesFound = Directory.GetFiles(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, 
+                                                    _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
                     progress progress = new progress();
                     progress.setMaxValue(filesFound.Length);
                     progress.Show();
@@ -560,7 +562,7 @@ namespace xtfileimporter
             }
             else
             {
-                filesFound = Directory.GetFiles(_inputPath.Text, "*.*", _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                filesFound = Directory.GetFiles(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
                 foreach (string file in filesFound)
                 {
                     DataRow row = files.NewRow();
