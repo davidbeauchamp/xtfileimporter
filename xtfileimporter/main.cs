@@ -7,6 +7,7 @@ using Npgsql;
 using System.IO;
 using NpgsqlTypes;
 using System.Diagnostics;
+using System.Threading;
 
 namespace xtfileimporter
 {
@@ -301,7 +302,15 @@ namespace xtfileimporter
         }
         private void _attach_Click(object sender, EventArgs e)
         {
-            attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE]);
+            new Thread(delegate()
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE]);
+                });
+                
+            }).Start();
+            
         }
         private void _preview_Click(object sender, EventArgs e)
         {
@@ -313,7 +322,14 @@ namespace xtfileimporter
         }
         private void _extract_Click(object sender, EventArgs e)
         {
-            extractFiles(types[_extractSourceType.Items.IndexOf(_extractSourceType.Text), SOURCETYPE]);
+            new Thread(delegate()
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    extractFiles(types[_extractSourceType.Items.IndexOf(_extractSourceType.Text), SOURCETYPE]);
+                });
+
+            }).Start();
         }
         private void _browseDirectory_Click(object sender, EventArgs e)
         {
@@ -353,6 +369,7 @@ namespace xtfileimporter
             string[] filesFound;
             string insertSourceQuery = "";
             bool saveToDb = _saveToDb.Checked;
+
             Int32 target_id = 0;
             Int32 source_id = 0;
 
@@ -378,7 +395,11 @@ namespace xtfileimporter
                 }
                 else
                 {
+
                     filesFound = Directory.GetFiles(_inputPath.Text, "*.*", _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                    progress progress = new progress();
+                    progress.setMaxValue(filesFound.Length);
+                    progress.Show();
                     conn.Open();
 
                     NpgsqlCommand command = new NpgsqlCommand(insertSourceQuery, conn);
@@ -407,6 +428,9 @@ namespace xtfileimporter
                     
                     foreach (string file in filesFound)
                     {
+                        progress.setLabel(Path.GetFullPath(file));
+                        progress.incremenet();
+
                         string sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
                         sourceId.Parameters["source_number"].Value = sourceNumber;
 
@@ -437,6 +461,7 @@ namespace xtfileimporter
                         docassCommand.Parameters["docass_target_id"].Value = target_id;
                         docassCommand.ExecuteScalar();
                     }
+                    progress.Close();
                 }
                 
             }
@@ -483,14 +508,25 @@ namespace xtfileimporter
                 }
                 else
                 {
+                    progress progress = new progress();
+
+                    if (filesToExtract.Rows.Count > 0)
+                    {
+                        progress.setMaxValue(filesToExtract.Rows.Count);
+                        progress.Show();
+                    }
                     conn.Open();
                     da.Fill(filesToExtract);
 
                     foreach (DataRow row in filesToExtract.Rows)
                     {
+                        progress.setLabel(row["file_descrip"].ToString().ToUpper());
+                        progress.incremenet();
+
                         File.WriteAllBytes(_outputPath.Text + "\\" + row["file_descrip"].ToString().ToUpper(), (byte[])row["file_stream"]);
                         output += String.Format("Wrote {0} to {1}", row["file_descrip"].ToString().ToUpper(), _outputPath.Text + "\\" + row["file_descrip"].ToString().ToUpper() + Environment.NewLine);
                     }
+                    progress.Close();
                 }
             }
             catch (Exception e)
