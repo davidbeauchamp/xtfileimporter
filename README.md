@@ -27,18 +27,21 @@ Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux
    * BOM 
    * Incident
 
+#Version 1.0.0.29 / 2014-Nov-17#
+-- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.29)
+-- Runs import process and matching on background thread, displaying progress while doing so.
+
+#Version 1.0.0.30+ Roadmap#
+-- Include headless mode
+
+#Older Releases#
+
 #Version 1.0.0.28 / 2014-Nov-15
 
 -- First binary release. You can download the binaries [from here](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.28)
 
 -- Bummed out the enum containing the document types, instead using index of first dimentsion from types array
    to build selectable types lists and to map back to the other columns in the array. 
-
-#Version 1.0.0.29+ Roadmap#
--- Do processing on background thread, provide feedback on processed items in realtime. 
--- Include headless mode
-
-#Older Releases#
 
 #Version 1.0.0.27#
 
