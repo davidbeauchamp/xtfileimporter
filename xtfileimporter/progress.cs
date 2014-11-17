@@ -15,10 +15,6 @@ namespace xtfileimporter
         {
             InitializeComponent();
         }
-        public void setLabel(string text)
-        {
-            _message.Text = text;
-        }
         public void setMaxValue(int value)
         {
             _progress.Maximum = value;

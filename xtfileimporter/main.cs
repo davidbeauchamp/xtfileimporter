@@ -13,7 +13,7 @@ namespace xtfileimporter
 {
     public partial class main : Form
     {
-        #region aguments
+        #region arguments
         // used for command line arguments
         // some of it is plumbing for an upcoming build
         string username = String.Empty;
@@ -441,7 +441,6 @@ namespace xtfileimporter
                     
                     foreach (string file in filesFound)
                     {
-                        progress.setLabel(Path.GetFullPath(file));
                         progress.incremenet();
 
                         string sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
@@ -533,7 +532,6 @@ namespace xtfileimporter
 
                     foreach (DataRow row in filesToExtract.Rows)
                     {
-                        progress.setLabel(row["file_descrip"].ToString().ToUpper());
                         progress.incremenet();
 
                         File.WriteAllBytes(_outputPath.Text + "\\" + row["file_descrip"].ToString().ToUpper(), (byte[])row["file_stream"]);
