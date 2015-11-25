@@ -34,7 +34,7 @@ Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux
 
 -- Fixing column override matching behavior (needed to cast to UPPER())
 
-#Version 1.0.0.31+ Roadmap#
+#Version 1.0.0.32+ Roadmap#
 -- Include headless mode
 
 #Older Releases#
