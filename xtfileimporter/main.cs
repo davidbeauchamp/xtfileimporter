@@ -17,18 +17,14 @@ namespace xtfileimporter
         #region arguments
         // used for command line arguments
         // some of it is plumbing for an upcoming build
-        string username = String.Empty;
-        string password = String.Empty;
-        string database = String.Empty;
-        string server = String.Empty;
         string sourcetype = String.Empty;
         string targettype = String.Empty;
         string outputpath = String.Empty;
         string inputpath = String.Empty;
         string mode = String.Empty;
-        int port = 0;
         bool headless = false;
         bool recursive = false;
+        NpgsqlConnection conn;
         #endregion
 
         // used to store the file list
@@ -47,18 +43,18 @@ namespace xtfileimporter
         /// 1: Document Type Abbreviation
         /// 2: Query to retrieve source id given the document number
         /// </para> 
-        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE {0}  = :source_number;", "item_number",         "item"},
-                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE {0}  = :source_number;", "crmacct_number",      "crmacct"},
-                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE {0}  = :source_number;", "cohead_number",       "cohead"},
-                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE {0}  = :source_number;", "ls_number",           "ls"},
-                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE {0}  = :source_number;", "wo_number::text || '-' || wo_subnumber::text",     "wo"},
-                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE {0}  = :source_number;", "pohead_number",       "pohead"},
-                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE {0}  = :source_number;", "vend_number",         "vendinfo"},
-                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE {0}  = :source_number;", "cntct_number",        "cntct"},
-                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE {0}  = :source_number;", "invchead_invcnumber", "invchead"},
-                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE {0}  = :source_number;", "prj_number",          "prj"},
-                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE {0}  = :source_number;", "quhead_number",       "quhead"},
-                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE {0}  = :source_number;", "vend_number",         "vendinfo"}
+        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE UPPER({0})  = :source_number;", "item_number",         "item"},
+                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE UPPER({0})  = :source_number;", "crmacct_number",      "crmacct"},
+                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE UPPER({0})  = :source_number;", "cohead_number",       "cohead"},
+                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE UPPER({0})  = :source_number;", "ls_number",           "ls"},
+                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE UPPER({0})  = :source_number;", "wo_number::text || '-' || wo_subnumber::text",     "wo"},
+                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE UPPER({0})  = :source_number;", "pohead_number",       "pohead"},
+                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE UPPER({0})  = :source_number;", "vend_number",         "vendinfo"},
+                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE UPPER({0})  = :source_number;", "cntct_number",        "cntct"},
+                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE UPPER({0})  = :source_number;", "invchead_invcnumber", "invchead"},
+                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE UPPER({0})  = :source_number;", "prj_number",          "prj"},
+                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE UPPER({0})  = :source_number;", "quhead_number",       "quhead"},
+                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE UPPER({0})  = :source_number;", "vend_number",         "vendinfo"}
         };
 
         // these constants represent the columns in the above types array
@@ -75,17 +71,12 @@ namespace xtfileimporter
         /// </summary>
         /// <param name="args">arguments as passed in via command line</param>
         /// <returns>main</returns>
-        public main(string[] _args)
+        public main(NpgsqlConnection _conn)
         {
             InitializeComponent();
-
+            this.conn = _conn;
             try
             {
-                if (_args.Length > 0)
-                {
-                    processArguments(_args);
-                }
-
                 // populate comboboxes
                 addTypeChoices();
 
@@ -103,19 +94,7 @@ namespace xtfileimporter
 
         #region helper
 
-        /// <summary>
-        /// Method to build the global connection string. Used in case people make changes in between operations
-        /// </summary>
-        /// <returns>string</returns>
-        private string getConnectionString()
-        {if (String.IsNullOrEmpty(_server.Text) || String.IsNullOrEmpty(_port.Text) || String.IsNullOrEmpty(_user.Text) || String.IsNullOrEmpty(_password.Text) || String.IsNullOrEmpty(_database.Text))
-            {
-                MessageBox.Show("Please completely fill out server information before continuing");
-                return null;
-            }
-           return String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};",
-                                _server.Text, _port.Text, _user.Text, _password.Text, _database.Text);
-        }
+
 
         /// <summary>
         /// Method to return a NpgsqlCommand with the right query for the chosen input sourceType
@@ -194,85 +173,6 @@ namespace xtfileimporter
             }
             _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
         }
-
-        /// <summary>
-        /// Method to pass out any arguments passed via the command line
-        /// should be in the format --argument=value
-        /// --help will display a list of valid arguments
-        /// </summary>
-        /// <param name="args">arguments as passed in from the command line</param>
-        /// <returns>void</returns>
-        private void processArguments(string[] args)
-        {
-            try
-            {
-                foreach (string s in args)
-                {
-                    if (s.ToLower().Contains("--help"))
-                    {
-                        showHelp();
-                        Environment.Exit(0);
-                    }
-                    else if (s.ToLower().Contains("--version"))
-                    {
-                        showVersion();
-                        Environment.Exit(0);
-                    }
-                    else if (s.ToLower().Contains("--username="))
-                    {
-                        this.username = s.Remove(0, 11);
-                        _user.Text = this.username;
-                    }
-                    else if (s.ToLower().Contains("--password="))
-                    {
-                        this.password = s.Remove(0, 11);
-                        _password.Text = this.password;
-                    }
-                    else if (s.ToLower().Contains("--server="))
-                    {
-                        this.server = s.Remove(0, 9);
-                        _server.Text = this.server;
-                    }
-                    else if (s.ToLower().Contains("--database="))
-                    {
-                        this.database = s.Remove(0, 11);
-                        _database.Text = this.database;
-                    }
-                    else if (s.ToLower().Contains("--port="))
-                    {
-                        this.port = Convert.ToInt16(s.Remove(0, 7));
-                        _port.Text = this.port.ToString();
-                    }
-                    else if (s.ToLower().Contains("--headless"))
-                    {
-                        this.headless = true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString(), "Error");
-                Environment.Exit(-1);
-            }
-        }
-        private void showHelp()
-        {
-            MessageBox.Show(this, @"xTuple File Importer Command Line Arguments" + Environment.NewLine + Environment.NewLine
-                      + "--help: Show this message, then exit." + Environment.NewLine
-                      + "--version: Show version information, then exit." + Environment.NewLine
-                      + "--server=<SERVER>: The PostgreSQL server. Required in headless mode." + Environment.NewLine
-                      + "--username=<USERNAME>: The PostgreSQL username. Required in headless mode." + Environment.NewLine
-                      + "--password=<PASSWORD>: The PostgreSQL password. Required in headless mode." + Environment.NewLine
-                      + "--database=<DATABSE>: The xTuple database you want to import into. Required in headless mode." + Environment.NewLine
-                      + "--port=<PORT>: The PostgreSQL server port for." + Environment.NewLine
-                      + "--headless: Forces headless operation.", "xtfileimporter " + AssemblyInfo.Version);
-        }
-        private void showVersion()
-        {
-            MessageBox.Show(this, @"Version: " + AssemblyInfo.Version + " Built On: " + AssemblyInfo.getBuildDate().ToString() + Environment.NewLine
-                      + "Written by David Beauchamp" + Environment.NewLine
-                      + "david@xtuple.com" + Environment.NewLine, "File importer for xTuple ERP");
-        }
         private void loadSettings()
         {
             // window location
@@ -304,7 +204,6 @@ namespace xtfileimporter
 
             Settings.Default.Save();
         }
-
         #endregion
 
         #region event handlers
@@ -317,10 +216,6 @@ namespace xtfileimporter
         private void main_FormClosing(object sender, FormClosingEventArgs e)
         {
             saveSettings();
-        }
-        private void _exit_Click(object sender, EventArgs e)
-        {
-            Environment.Exit(0);
         }
         private void _attach_Click(object sender, EventArgs e)
         {
@@ -402,7 +297,7 @@ namespace xtfileimporter
             Int32 target_id = 0;
             Int32 source_id = 0;
 
-            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
+            //NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
             if (saveToDb)
             {
                 insertSourceQuery = "INSERT INTO file (file_title, file_stream, file_descrip) VALUES (:file_title, :file_stream, :file_descrip) RETURNING file_id;";
@@ -431,7 +326,7 @@ namespace xtfileimporter
                     progress progress = new progress();
                     progress.setMaxValue(filesFound.Length);
                     progress.Show();
-                    conn.Open();
+                    //conn.Open();
 
                     NpgsqlCommand command = new NpgsqlCommand(insertSourceQuery, conn);
                     if (saveToDb)
@@ -523,8 +418,6 @@ namespace xtfileimporter
             finally
             {
                 output += "Completed at " + DateTime.Now;
-                conn.Close();
-                conn.Dispose();
                 outputlog ol = new outputlog();
                 ol.setText(output);
                 ol.Show();
@@ -568,7 +461,7 @@ namespace xtfileimporter
                                             +" WHERE docass_source_type = '{0}';", sourceType);
             
             DataTable filesToExtract = new DataTable();
-            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
+            //NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(fileQuery, conn);
 
             try
@@ -587,7 +480,6 @@ namespace xtfileimporter
                         progress.setMaxValue(filesToExtract.Rows.Count);
                         progress.Show();
                     }
-                    conn.Open();
                     da.Fill(filesToExtract);
 
                     foreach (DataRow row in filesToExtract.Rows)
@@ -607,8 +499,6 @@ namespace xtfileimporter
             finally
             {
                 output += "Completed at " + DateTime.Now;
-                conn.Close();
-                conn.Dispose();
                 outputlog ol = new outputlog();
                 ol.setText(output);
                 ol.Show();
@@ -650,7 +540,6 @@ namespace xtfileimporter
         /// <returns>void</returns>
         private void attemptmatch()
         {
-            NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
             previewFiles();
             try
             {
@@ -662,8 +551,6 @@ namespace xtfileimporter
                 else
                 {
                     progress progress = new progress();
-
-                    conn.Open();
 
                     NpgsqlCommand sourceId = getSourceCommand(conn);
 
@@ -720,8 +607,6 @@ namespace xtfileimporter
             finally
             {
                 files.AcceptChanges();
-                conn.Close();
-                conn.Dispose();
             }
         }
 

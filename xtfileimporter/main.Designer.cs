@@ -48,38 +48,24 @@
             this._outputPathLit = new System.Windows.Forms.Label();
             this._outputPath = new System.Windows.Forms.TextBox();
             this._outputPathChooser = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this._databaseLit = new System.Windows.Forms.Label();
-            this._database = new System.Windows.Forms.TextBox();
-            this._exit = new System.Windows.Forms.Button();
-            this._portLit = new System.Windows.Forms.Label();
-            this._port = new System.Windows.Forms.TextBox();
-            this._serverLit = new System.Windows.Forms.Label();
-            this._server = new System.Windows.Forms.TextBox();
-            this._passwordLit = new System.Windows.Forms.Label();
-            this._password = new System.Windows.Forms.TextBox();
-            this._userLit = new System.Windows.Forms.Label();
-            this._user = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).BeginInit();
             this._exportTab.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this._tabs, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this._tabs, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 75F));
+            this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(684, 462);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -88,10 +74,10 @@
             this._tabs.Controls.Add(this._importTab);
             this._tabs.Controls.Add(this._exportTab);
             this._tabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._tabs.Location = new System.Drawing.Point(3, 78);
+            this._tabs.Location = new System.Drawing.Point(3, 3);
             this._tabs.Name = "_tabs";
             this._tabs.SelectedIndex = 0;
-            this._tabs.Size = new System.Drawing.Size(678, 381);
+            this._tabs.Size = new System.Drawing.Size(678, 456);
             this._tabs.TabIndex = 0;
             // 
             // _importTab
@@ -119,7 +105,7 @@
             this._importTab.Location = new System.Drawing.Point(4, 22);
             this._importTab.Name = "_importTab";
             this._importTab.Padding = new System.Windows.Forms.Padding(3);
-            this._importTab.Size = new System.Drawing.Size(670, 355);
+            this._importTab.Size = new System.Drawing.Size(670, 430);
             this._importTab.TabIndex = 0;
             this._importTab.Text = "Bulk Import Files";
             this._importTab.UseVisualStyleBackColor = true;
@@ -237,7 +223,7 @@
             this._previewGrid.Name = "_previewGrid";
             this._previewGrid.ReadOnly = true;
             this._previewGrid.ShowEditingIcon = false;
-            this._previewGrid.Size = new System.Drawing.Size(670, 237);
+            this._previewGrid.Size = new System.Drawing.Size(670, 312);
             this._previewGrid.TabIndex = 9;
             // 
             // _recursive
@@ -409,119 +395,6 @@
             this._outputPathChooser.UseVisualStyleBackColor = true;
             this._outputPathChooser.Click += new System.EventHandler(this._outputPathChooser_Click);
             // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this._databaseLit);
-            this.panel1.Controls.Add(this._database);
-            this.panel1.Controls.Add(this._exit);
-            this.panel1.Controls.Add(this._portLit);
-            this.panel1.Controls.Add(this._port);
-            this.panel1.Controls.Add(this._serverLit);
-            this.panel1.Controls.Add(this._server);
-            this.panel1.Controls.Add(this._passwordLit);
-            this.panel1.Controls.Add(this._password);
-            this.panel1.Controls.Add(this._userLit);
-            this.panel1.Controls.Add(this._user);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(678, 69);
-            this.panel1.TabIndex = 1;
-            // 
-            // _databaseLit
-            // 
-            this._databaseLit.AutoSize = true;
-            this._databaseLit.Location = new System.Drawing.Point(194, 38);
-            this._databaseLit.Name = "_databaseLit";
-            this._databaseLit.Size = new System.Drawing.Size(53, 13);
-            this._databaseLit.TabIndex = 12;
-            this._databaseLit.Text = "Database";
-            // 
-            // _database
-            // 
-            this._database.Location = new System.Drawing.Point(250, 35);
-            this._database.Name = "_database";
-            this._database.Size = new System.Drawing.Size(158, 20);
-            this._database.TabIndex = 3;
-            // 
-            // _exit
-            // 
-            this._exit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._exit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this._exit.Location = new System.Drawing.Point(594, 7);
-            this._exit.Name = "_exit";
-            this._exit.Size = new System.Drawing.Size(75, 23);
-            this._exit.TabIndex = 10;
-            this._exit.Text = "Exit";
-            this._exit.UseVisualStyleBackColor = true;
-            this._exit.Click += new System.EventHandler(this._exit_Click);
-            // 
-            // _portLit
-            // 
-            this._portLit.AutoSize = true;
-            this._portLit.Location = new System.Drawing.Point(428, 38);
-            this._portLit.Name = "_portLit";
-            this._portLit.Size = new System.Drawing.Size(26, 13);
-            this._portLit.TabIndex = 7;
-            this._portLit.Text = "Port";
-            // 
-            // _port
-            // 
-            this._port.Location = new System.Drawing.Point(460, 35);
-            this._port.Name = "_port";
-            this._port.Size = new System.Drawing.Size(100, 20);
-            this._port.TabIndex = 4;
-            this._port.Text = "5432";
-            // 
-            // _serverLit
-            // 
-            this._serverLit.AutoSize = true;
-            this._serverLit.Location = new System.Drawing.Point(206, 12);
-            this._serverLit.Name = "_serverLit";
-            this._serverLit.Size = new System.Drawing.Size(38, 13);
-            this._serverLit.TabIndex = 5;
-            this._serverLit.Text = "Server";
-            // 
-            // _server
-            // 
-            this._server.Location = new System.Drawing.Point(250, 9);
-            this._server.Name = "_server";
-            this._server.Size = new System.Drawing.Size(158, 20);
-            this._server.TabIndex = 2;
-            // 
-            // _passwordLit
-            // 
-            this._passwordLit.AutoSize = true;
-            this._passwordLit.Location = new System.Drawing.Point(20, 38);
-            this._passwordLit.Name = "_passwordLit";
-            this._passwordLit.Size = new System.Drawing.Size(53, 13);
-            this._passwordLit.TabIndex = 3;
-            this._passwordLit.Text = "Password";
-            // 
-            // _password
-            // 
-            this._password.Location = new System.Drawing.Point(79, 35);
-            this._password.Name = "_password";
-            this._password.PasswordChar = '*';
-            this._password.Size = new System.Drawing.Size(100, 20);
-            this._password.TabIndex = 1;
-            // 
-            // _userLit
-            // 
-            this._userLit.AutoSize = true;
-            this._userLit.Location = new System.Drawing.Point(44, 12);
-            this._userLit.Name = "_userLit";
-            this._userLit.Size = new System.Drawing.Size(29, 13);
-            this._userLit.TabIndex = 1;
-            this._userLit.Text = "User";
-            // 
-            // _user
-            // 
-            this._user.Location = new System.Drawing.Point(79, 9);
-            this._user.Name = "_user";
-            this._user.Size = new System.Drawing.Size(100, 20);
-            this._user.TabIndex = 0;
-            // 
             // main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -539,8 +412,6 @@
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).EndInit();
             this._exportTab.ResumeLayout(false);
             this._exportTab.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -548,18 +419,6 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button _exit;
-        private System.Windows.Forms.Label _portLit;
-        private System.Windows.Forms.TextBox _port;
-        private System.Windows.Forms.Label _serverLit;
-        private System.Windows.Forms.TextBox _server;
-        private System.Windows.Forms.Label _passwordLit;
-        private System.Windows.Forms.TextBox _password;
-        private System.Windows.Forms.Label _userLit;
-        private System.Windows.Forms.TextBox _user;
-        private System.Windows.Forms.Label _databaseLit;
-        private System.Windows.Forms.TextBox _database;
         private System.Windows.Forms.TabControl _tabs;
         private System.Windows.Forms.TabPage _importTab;
         private System.Windows.Forms.Button _attempt;

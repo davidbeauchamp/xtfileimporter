@@ -12,7 +12,7 @@ namespace xtfileimporter
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new main(args));
+            Application.Run(new login(args));
         }
     }
 }

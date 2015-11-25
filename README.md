@@ -27,17 +27,24 @@ Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux
    * ~~BOM~~ Coming again soon
    * Incident
 
+#Version 1.0.0.31 / 2015-Nov-25#
+-- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.31)
+
+-- Splitting login and connection to its own screen 
+
+-- Fixing column override matching behavior (needed to cast to UPPER())
+
+#Version 1.0.0.31+ Roadmap#
+-- Include headless mode
+
+#Older Releases#
+
 #Version 1.0.0.30 / 2015-Nov-25#
 -- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.30)
 
 -- Includes support for matching the beginning of a filename instead of just the whole filename. 
 
 -- Includes support for overriding the column matched against
-
-#Version 1.0.0.31+ Roadmap#
--- Include headless mode
-
-#Older Releases#
 
 #Version 1.0.0.29 / 2014-Nov-17#
 -- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.29)

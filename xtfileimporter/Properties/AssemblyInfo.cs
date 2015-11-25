@@ -30,8 +30,8 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.30")]
-[assembly: AssemblyFileVersion("1.0.0.30")]
+[assembly: AssemblyVersion("1.0.0.31")]
+[assembly: AssemblyFileVersion("1.0.0.31")]
 [assembly: NeutralResourcesLanguageAttribute("en")]
 
 // modified from http://geekswithblogs.net/dbrown/archive/2009/04/06/easy-access-to-assemblyinfo.cs-attributes.aspx
