@@ -20,6 +20,14 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this._tabs = new System.Windows.Forms.TabControl();
             this._importTab = new System.Windows.Forms.TabPage();
+            this._overrideColumn = new System.Windows.Forms.CheckBox();
+            this._separator = new System.Windows.Forms.ComboBox();
+            this._separatorLit = new System.Windows.Forms.Label();
+            this._column = new System.Windows.Forms.TextBox();
+            this._searchMethod = new System.Windows.Forms.ComboBox();
+            this._fileLit = new System.Windows.Forms.Label();
+            this._maskLit = new System.Windows.Forms.Label();
+            this._mask = new System.Windows.Forms.TextBox();
             this._attempt = new System.Windows.Forms.Button();
             this._preview = new System.Windows.Forms.Button();
             this._previewGrid = new System.Windows.Forms.DataGridView();
@@ -52,8 +60,6 @@
             this._password = new System.Windows.Forms.TextBox();
             this._userLit = new System.Windows.Forms.Label();
             this._user = new System.Windows.Forms.TextBox();
-            this._mask = new System.Windows.Forms.TextBox();
-            this._maskLit = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -90,6 +96,12 @@
             // 
             // _importTab
             // 
+            this._importTab.Controls.Add(this._overrideColumn);
+            this._importTab.Controls.Add(this._separator);
+            this._importTab.Controls.Add(this._separatorLit);
+            this._importTab.Controls.Add(this._column);
+            this._importTab.Controls.Add(this._searchMethod);
+            this._importTab.Controls.Add(this._fileLit);
             this._importTab.Controls.Add(this._maskLit);
             this._importTab.Controls.Add(this._mask);
             this._importTab.Controls.Add(this._attempt);
@@ -112,9 +124,90 @@
             this._importTab.Text = "Bulk Import Files";
             this._importTab.UseVisualStyleBackColor = true;
             // 
+            // _overrideColumn
+            // 
+            this._overrideColumn.AutoSize = true;
+            this._overrideColumn.Location = new System.Drawing.Point(374, 61);
+            this._overrideColumn.Name = "_overrideColumn";
+            this._overrideColumn.Size = new System.Drawing.Size(104, 17);
+            this._overrideColumn.TabIndex = 21;
+            this._overrideColumn.Text = "Override Column";
+            this._overrideColumn.UseVisualStyleBackColor = true;
+            this._overrideColumn.CheckedChanged += new System.EventHandler(this._overrideColumn_CheckedChanged);
+            // 
+            // _separator
+            // 
+            this._separator.FormattingEnabled = true;
+            this._separator.Items.AddRange(new object[] {
+            "_",
+            "-",
+            "."});
+            this._separator.Location = new System.Drawing.Point(311, 59);
+            this._separator.Name = "_separator";
+            this._separator.Size = new System.Drawing.Size(38, 21);
+            this._separator.TabIndex = 20;
+            this._separator.Text = "_";
+            // 
+            // _separatorLit
+            // 
+            this._separatorLit.AutoSize = true;
+            this._separatorLit.Location = new System.Drawing.Point(234, 62);
+            this._separatorLit.Name = "_separatorLit";
+            this._separatorLit.Size = new System.Drawing.Size(71, 13);
+            this._separatorLit.TabIndex = 19;
+            this._separatorLit.Text = "Separated By";
+            // 
+            // _column
+            // 
+            this._column.Enabled = false;
+            this._column.Location = new System.Drawing.Point(487, 59);
+            this._column.Name = "_column";
+            this._column.Size = new System.Drawing.Size(161, 20);
+            this._column.TabIndex = 17;
+            // 
+            // _searchMethod
+            // 
+            this._searchMethod.FormattingEnabled = true;
+            this._searchMethod.Items.AddRange(new object[] {
+            "Begins With",
+            "Equals"});
+            this._searchMethod.Location = new System.Drawing.Point(75, 59);
+            this._searchMethod.Name = "_searchMethod";
+            this._searchMethod.Size = new System.Drawing.Size(153, 21);
+            this._searchMethod.TabIndex = 16;
+            this._searchMethod.Text = "Begins With";
+            this._searchMethod.SelectedIndexChanged += new System.EventHandler(this._searchMethod_SelectedIndexChanged);
+            this._searchMethod.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._searchMethod_KeyPress);
+            // 
+            // _fileLit
+            // 
+            this._fileLit.AutoSize = true;
+            this._fileLit.Location = new System.Drawing.Point(15, 62);
+            this._fileLit.Name = "_fileLit";
+            this._fileLit.Size = new System.Drawing.Size(54, 13);
+            this._fileLit.TabIndex = 15;
+            this._fileLit.Text = "File Name";
+            // 
+            // _maskLit
+            // 
+            this._maskLit.AutoSize = true;
+            this._maskLit.Location = new System.Drawing.Point(448, 9);
+            this._maskLit.Name = "_maskLit";
+            this._maskLit.Size = new System.Drawing.Size(33, 13);
+            this._maskLit.TabIndex = 14;
+            this._maskLit.Text = "Mask";
+            // 
+            // _mask
+            // 
+            this._mask.Location = new System.Drawing.Point(489, 6);
+            this._mask.Name = "_mask";
+            this._mask.Size = new System.Drawing.Size(51, 20);
+            this._mask.TabIndex = 13;
+            this._mask.Text = "*.*";
+            // 
             // _attempt
             // 
-            this._attempt.Location = new System.Drawing.Point(390, 76);
+            this._attempt.Location = new System.Drawing.Point(387, 86);
             this._attempt.Name = "_attempt";
             this._attempt.Size = new System.Drawing.Size(150, 23);
             this._attempt.TabIndex = 12;
@@ -124,7 +217,7 @@
             // 
             // _preview
             // 
-            this._preview.Location = new System.Drawing.Point(234, 76);
+            this._preview.Location = new System.Drawing.Point(231, 86);
             this._preview.Name = "_preview";
             this._preview.Size = new System.Drawing.Size(150, 23);
             this._preview.TabIndex = 11;
@@ -140,17 +233,17 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this._previewGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._previewGrid.Location = new System.Drawing.Point(0, 105);
+            this._previewGrid.Location = new System.Drawing.Point(0, 115);
             this._previewGrid.Name = "_previewGrid";
             this._previewGrid.ReadOnly = true;
             this._previewGrid.ShowEditingIcon = false;
-            this._previewGrid.Size = new System.Drawing.Size(670, 247);
+            this._previewGrid.Size = new System.Drawing.Size(670, 237);
             this._previewGrid.TabIndex = 9;
             // 
             // _recursive
             // 
             this._recursive.AutoSize = true;
-            this._recursive.Location = new System.Drawing.Point(456, 50);
+            this._recursive.Location = new System.Drawing.Point(456, 33);
             this._recursive.Name = "_recursive";
             this._recursive.Size = new System.Drawing.Size(173, 17);
             this._recursive.TabIndex = 8;
@@ -159,7 +252,7 @@
             // 
             // _attach
             // 
-            this._attach.Location = new System.Drawing.Point(78, 76);
+            this._attach.Location = new System.Drawing.Point(75, 86);
             this._attach.Name = "_attach";
             this._attach.Size = new System.Drawing.Size(150, 23);
             this._attach.TabIndex = 7;
@@ -171,7 +264,7 @@
             // 
             this._attachOnly.AutoSize = true;
             this._attachOnly.Checked = true;
-            this._attachOnly.Location = new System.Drawing.Point(355, 50);
+            this._attachOnly.Location = new System.Drawing.Point(355, 33);
             this._attachOnly.Name = "_attachOnly";
             this._attachOnly.Size = new System.Drawing.Size(80, 17);
             this._attachOnly.TabIndex = 6;
@@ -182,7 +275,7 @@
             // _saveToDb
             // 
             this._saveToDb.AutoSize = true;
-            this._saveToDb.Location = new System.Drawing.Point(234, 50);
+            this._saveToDb.Location = new System.Drawing.Point(234, 33);
             this._saveToDb.Name = "_saveToDb";
             this._saveToDb.Size = new System.Drawing.Size(115, 17);
             this._saveToDb.TabIndex = 5;
@@ -192,16 +285,18 @@
             // _importSourceType
             // 
             this._importSourceType.FormattingEnabled = true;
-            this._importSourceType.Location = new System.Drawing.Point(75, 49);
+            this._importSourceType.Location = new System.Drawing.Point(75, 32);
             this._importSourceType.Name = "_importSourceType";
             this._importSourceType.Size = new System.Drawing.Size(153, 21);
             this._importSourceType.TabIndex = 4;
             this._importSourceType.Text = "Items";
+            this._importSourceType.SelectedIndexChanged += new System.EventHandler(this._importSourceType_SelectedIndexChanged);
+            this._importSourceType.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._searchMethod_KeyPress);
             // 
             // _importSourceTypeLit
             // 
             this._importSourceTypeLit.AutoSize = true;
-            this._importSourceTypeLit.Location = new System.Drawing.Point(15, 52);
+            this._importSourceTypeLit.Location = new System.Drawing.Point(15, 35);
             this._importSourceTypeLit.Name = "_importSourceTypeLit";
             this._importSourceTypeLit.Size = new System.Drawing.Size(54, 13);
             this._importSourceTypeLit.TabIndex = 3;
@@ -210,7 +305,7 @@
             // _inputPathLit
             // 
             this._inputPathLit.AutoSize = true;
-            this._inputPathLit.Location = new System.Drawing.Point(3, 26);
+            this._inputPathLit.Location = new System.Drawing.Point(6, 9);
             this._inputPathLit.Name = "_inputPathLit";
             this._inputPathLit.Size = new System.Drawing.Size(66, 13);
             this._inputPathLit.TabIndex = 2;
@@ -218,14 +313,14 @@
             // 
             // _inputPath
             // 
-            this._inputPath.Location = new System.Drawing.Point(75, 23);
+            this._inputPath.Location = new System.Drawing.Point(75, 6);
             this._inputPath.Name = "_inputPath";
             this._inputPath.Size = new System.Drawing.Size(293, 20);
             this._inputPath.TabIndex = 5;
             // 
             // _inputPathChooser
             // 
-            this._inputPathChooser.Location = new System.Drawing.Point(374, 21);
+            this._inputPathChooser.Location = new System.Drawing.Point(374, 4);
             this._inputPathChooser.Name = "_inputPathChooser";
             this._inputPathChooser.Size = new System.Drawing.Size(47, 23);
             this._inputPathChooser.TabIndex = 6;
@@ -427,23 +522,6 @@
             this._user.Size = new System.Drawing.Size(100, 20);
             this._user.TabIndex = 0;
             // 
-            // _mask
-            // 
-            this._mask.Location = new System.Drawing.Point(489, 23);
-            this._mask.Name = "_mask";
-            this._mask.Size = new System.Drawing.Size(51, 20);
-            this._mask.TabIndex = 13;
-            this._mask.Text = "*.*";
-            // 
-            // _maskLit
-            // 
-            this._maskLit.AutoSize = true;
-            this._maskLit.Location = new System.Drawing.Point(448, 26);
-            this._maskLit.Name = "_maskLit";
-            this._maskLit.Size = new System.Drawing.Size(33, 13);
-            this._maskLit.TabIndex = 14;
-            this._maskLit.Text = "Mask";
-            // 
             // main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -506,6 +584,11 @@
         private System.Windows.Forms.Button _browseDirectory;
         private System.Windows.Forms.Label _maskLit;
         private System.Windows.Forms.TextBox _mask;
-
+        private System.Windows.Forms.TextBox _column;
+        private System.Windows.Forms.ComboBox _searchMethod;
+        private System.Windows.Forms.Label _fileLit;
+        private System.Windows.Forms.ComboBox _separator;
+        private System.Windows.Forms.Label _separatorLit;
+        private System.Windows.Forms.CheckBox _overrideColumn;
     }
 }

@@ -8,6 +8,7 @@ using System.IO;
 using NpgsqlTypes;
 using System.Diagnostics;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace xtfileimporter
 {
@@ -36,7 +37,7 @@ namespace xtfileimporter
         string output = String.Empty;
 
         #region type map
-
+        //// this whole thing is made useless by the source table expanded in v4.9.0 of xTuple. I will be replacing this with that table soon
         /// <summary>
         /// Array of supported document types
         /// </summary>
@@ -46,24 +47,26 @@ namespace xtfileimporter
         /// 1: Document Type Abbreviation
         /// 2: Query to retrieve source id given the document number
         /// </para> 
-        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE item_number           = :source_number;"},
-                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE crmacct_number        = :source_number;"},
-                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE cohead_number         = :source_number;"},
-                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE ls_number             = :source_number;"},
-                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE wo_number::text       = :source_number;"},
-                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE pohead_number         = :source_number;"},
-                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE vend_number           = :source_number;"},
-                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE cntct_number          = :source_number;"},
-                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE invchead_invcnumber   = :source_number;"},
-                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE prj_number            = :source_number;"},
-                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE quhead_number         = :source_number;"},
-                                          {"BOM",           "BMH",      "SELECT bomhead_id  FROM bomhead    WHERE bomhead_item_id       = getitemid(:source_number);"},
-                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE vend_number           = :source_number;"}};
+        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE {0}  = :source_number;", "item_number",         "item"},
+                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE {0}  = :source_number;", "crmacct_number",      "crmacct"},
+                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE {0}  = :source_number;", "cohead_number",       "cohead"},
+                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE {0}  = :source_number;", "ls_number",           "ls"},
+                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE {0}  = :source_number;", "wo_number::text || '-' || wo_subnumber::text",     "wo"},
+                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE {0}  = :source_number;", "pohead_number",       "pohead"},
+                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE {0}  = :source_number;", "vend_number",         "vendinfo"},
+                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE {0}  = :source_number;", "cntct_number",        "cntct"},
+                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE {0}  = :source_number;", "invchead_invcnumber", "invchead"},
+                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE {0}  = :source_number;", "prj_number",          "prj"},
+                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE {0}  = :source_number;", "quhead_number",       "quhead"},
+                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE {0}  = :source_number;", "vend_number",         "vendinfo"}
+        };
 
         // these constants represent the columns in the above types array
         int SOURCE = 0,
             SOURCETYPE = 1,
-            SOURCEQUERY = 2;
+            SOURCEQUERY = 2,
+            SOURCECOLUMN = 3,
+            SOURCETABLE = 4;
 
         #endregion
 
@@ -105,7 +108,11 @@ namespace xtfileimporter
         /// </summary>
         /// <returns>string</returns>
         private string getConnectionString()
-        {
+        {if (String.IsNullOrEmpty(_server.Text) || String.IsNullOrEmpty(_port.Text) || String.IsNullOrEmpty(_user.Text) || String.IsNullOrEmpty(_password.Text) || String.IsNullOrEmpty(_database.Text))
+            {
+                MessageBox.Show("Please completely fill out server information before continuing");
+                return null;
+            }
            return String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};",
                                 _server.Text, _port.Text, _user.Text, _password.Text, _database.Text);
         }
@@ -119,6 +126,15 @@ namespace xtfileimporter
         private NpgsqlCommand getSourceCommand(NpgsqlConnection conn)
         {
             string sourceQuery = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCEQUERY];
+            if (_overrideColumn.Checked)
+            {
+                sourceQuery = String.Format(sourceQuery, _column.Text);
+            }
+            else
+            {
+                sourceQuery = String.Format(sourceQuery, types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN]);
+            }
+
             NpgsqlCommand sourceCommand = new NpgsqlCommand(sourceQuery, conn);
             sourceCommand.Parameters.Add(new NpgsqlParameter("source_number", NpgsqlDbType.Text));
             return sourceCommand;
@@ -176,6 +192,7 @@ namespace xtfileimporter
                 _importSourceType.Items.Add(types[i, SOURCE]);
                 _extractSourceType.Items.Add(types[i, SOURCE]);
             }
+            _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
         }
 
         /// <summary>
@@ -243,6 +260,7 @@ namespace xtfileimporter
             MessageBox.Show(this, @"xTuple File Importer Command Line Arguments" + Environment.NewLine + Environment.NewLine
                       + "--help: Show this message, then exit." + Environment.NewLine
                       + "--version: Show version information, then exit." + Environment.NewLine
+                      + "--server=<SERVER>: The PostgreSQL server. Required in headless mode." + Environment.NewLine
                       + "--username=<USERNAME>: The PostgreSQL username. Required in headless mode." + Environment.NewLine
                       + "--password=<PASSWORD>: The PostgreSQL password. Required in headless mode." + Environment.NewLine
                       + "--database=<DATABSE>: The xTuple database you want to import into. Required in headless mode." + Environment.NewLine
@@ -443,7 +461,28 @@ namespace xtfileimporter
                     {
                         progress.incremenet();
 
-                        string sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                        string sourceNumber = "";
+                        if (_searchMethod.Text == "Begins With")
+                        {
+                            Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
+                            string[] matches = regex.Split(Path.GetFileNameWithoutExtension(file).ToUpper());
+                            //Match match = regex.Match(row["fileName"].ToString());
+                            if (matches.Length > 0)
+                            {
+                                sourceNumber = matches[0].ToUpper();
+                            }
+                            else
+                            {
+                                // if we didn't get any matches, maybe the filename is the document number on its own
+                                sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                            }
+
+                        }
+                        else if (_searchMethod.Text == "Equals")
+                        {
+                            sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                        }
+
                         sourceId.Parameters["source_number"].Value = sourceNumber;
 
                         try
@@ -457,7 +496,7 @@ namespace xtfileimporter
 
                         if (saveToDb)
                         {
-                            command.Parameters["file_title"].Value = sourceNumber;
+                            command.Parameters["file_title"].Value = Path.GetFileName(file);
                             command.Parameters["file_descrip"].Value = Path.GetFileName(file);
                             command.Parameters["file_stream"].Value = fileToByteArray(file);
                         }
@@ -491,6 +530,27 @@ namespace xtfileimporter
                 ol.Show();
             }
 
+        }
+
+        private void _searchMethod_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _separator.Enabled = (_searchMethod.Text == "Begins With");
+            _separatorLit.Enabled = (_searchMethod.Text == "Begins With");
+        }
+
+        private void _overrideColumn_CheckedChanged(object sender, EventArgs e)
+        {
+            _column.Enabled = _overrideColumn.Checked;
+        }
+
+        private void _importSourceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
+        }
+
+        private void _searchMethod_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = (char)Keys.None;
         }
 
         /// <summary>
@@ -615,7 +675,27 @@ namespace xtfileimporter
 
                     foreach (DataRow row in files.Rows)
                     {
-                        string sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
+                        string sourceNumber = "";
+
+                        if (_searchMethod.Text == "Begins With")
+                        {
+                            Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
+                            string[] matches = regex.Split(row["fileNameNoExt"].ToString());
+                            //Match match = regex.Match(row["fileName"].ToString());
+                            if (matches.Length > 0)
+                            {
+                                sourceNumber = matches[0].ToUpper();
+                            }
+                            else
+                            {
+                                sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
+                            }
+
+                        }
+                        else if (_searchMethod.Text == "Equals") {
+                            sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
+                        }
+
                         sourceId.Parameters["source_number"].Value = sourceNumber;
                         progress.incremenet();
                         try
