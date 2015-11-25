@@ -27,7 +27,7 @@ Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux
    * ~~BOM~~ Coming again soon
    * Incident
 
-#Version 1.0.0.30 / 2014-Nov-17#
+#Version 1.0.0.30 / 2015-Nov-25#
 -- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.30)
 
 -- Includes support for matching the beginning of a filename instead of just the whole filename. 
