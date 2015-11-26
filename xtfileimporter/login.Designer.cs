@@ -33,6 +33,7 @@
             this._server = new System.Windows.Forms.TextBox();
             this._user = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this._login = new System.Windows.Forms.Button();
             this._databaseLit = new System.Windows.Forms.Label();
             this._exit = new System.Windows.Forms.Button();
             this._port = new System.Windows.Forms.TextBox();
@@ -40,13 +41,12 @@
             this._passwordLit = new System.Windows.Forms.Label();
             this._password = new System.Windows.Forms.TextBox();
             this._userLit = new System.Windows.Forms.Label();
-            this._login = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // _database
             // 
-            this._database.Location = new System.Drawing.Point(79, 86);
+            this._database.Location = new System.Drawing.Point(79, 112);
             this._database.Name = "_database";
             this._database.Size = new System.Drawing.Size(158, 20);
             this._database.TabIndex = 3;
@@ -54,7 +54,7 @@
             // _portLit
             // 
             this._portLit.AutoSize = true;
-            this._portLit.Location = new System.Drawing.Point(47, 115);
+            this._portLit.Location = new System.Drawing.Point(47, 89);
             this._portLit.Name = "_portLit";
             this._portLit.Size = new System.Drawing.Size(26, 13);
             this._portLit.TabIndex = 7;
@@ -94,10 +94,21 @@
             this.panel1.Size = new System.Drawing.Size(347, 146);
             this.panel1.TabIndex = 2;
             // 
+            // _login
+            // 
+            this._login.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this._login.Location = new System.Drawing.Point(260, 39);
+            this._login.Name = "_login";
+            this._login.Size = new System.Drawing.Size(75, 23);
+            this._login.TabIndex = 5;
+            this._login.Text = "Login";
+            this._login.UseVisualStyleBackColor = true;
+            this._login.Click += new System.EventHandler(this._login_Click);
+            // 
             // _databaseLit
             // 
             this._databaseLit.AutoSize = true;
-            this._databaseLit.Location = new System.Drawing.Point(23, 89);
+            this._databaseLit.Location = new System.Drawing.Point(20, 115);
             this._databaseLit.Name = "_databaseLit";
             this._databaseLit.Size = new System.Drawing.Size(53, 13);
             this._databaseLit.TabIndex = 12;
@@ -117,7 +128,7 @@
             // 
             // _port
             // 
-            this._port.Location = new System.Drawing.Point(79, 112);
+            this._port.Location = new System.Drawing.Point(79, 86);
             this._port.Name = "_port";
             this._port.Size = new System.Drawing.Size(158, 20);
             this._port.TabIndex = 4;
@@ -157,17 +168,6 @@
             this._userLit.Size = new System.Drawing.Size(29, 13);
             this._userLit.TabIndex = 1;
             this._userLit.Text = "User";
-            // 
-            // _login
-            // 
-            this._login.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this._login.Location = new System.Drawing.Point(260, 39);
-            this._login.Name = "_login";
-            this._login.Size = new System.Drawing.Size(75, 23);
-            this._login.TabIndex = 5;
-            this._login.Text = "Login";
-            this._login.UseVisualStyleBackColor = true;
-            this._login.Click += new System.EventHandler(this._login_Click);
             // 
             // login
             // 

@@ -20,12 +20,14 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this._tabs = new System.Windows.Forms.TabControl();
             this._importTab = new System.Windows.Forms.TabPage();
+            this._matchAgainstGroup = new System.Windows.Forms.GroupBox();
+            this._matchDirectory = new System.Windows.Forms.RadioButton();
+            this._matchFileName = new System.Windows.Forms.RadioButton();
             this._overrideColumn = new System.Windows.Forms.CheckBox();
             this._separator = new System.Windows.Forms.ComboBox();
             this._separatorLit = new System.Windows.Forms.Label();
             this._column = new System.Windows.Forms.TextBox();
             this._searchMethod = new System.Windows.Forms.ComboBox();
-            this._fileLit = new System.Windows.Forms.Label();
             this._maskLit = new System.Windows.Forms.Label();
             this._mask = new System.Windows.Forms.TextBox();
             this._attempt = new System.Windows.Forms.Button();
@@ -51,6 +53,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
+            this._matchAgainstGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).BeginInit();
             this._exportTab.SuspendLayout();
             this.SuspendLayout();
@@ -82,12 +85,12 @@
             // 
             // _importTab
             // 
+            this._importTab.Controls.Add(this._matchAgainstGroup);
             this._importTab.Controls.Add(this._overrideColumn);
             this._importTab.Controls.Add(this._separator);
             this._importTab.Controls.Add(this._separatorLit);
             this._importTab.Controls.Add(this._column);
             this._importTab.Controls.Add(this._searchMethod);
-            this._importTab.Controls.Add(this._fileLit);
             this._importTab.Controls.Add(this._maskLit);
             this._importTab.Controls.Add(this._mask);
             this._importTab.Controls.Add(this._attempt);
@@ -110,10 +113,46 @@
             this._importTab.Text = "Bulk Import Files";
             this._importTab.UseVisualStyleBackColor = true;
             // 
+            // _matchAgainstGroup
+            // 
+            this._matchAgainstGroup.Controls.Add(this._matchDirectory);
+            this._matchAgainstGroup.Controls.Add(this._matchFileName);
+            this._matchAgainstGroup.Location = new System.Drawing.Point(75, 59);
+            this._matchAgainstGroup.Name = "_matchAgainstGroup";
+            this._matchAgainstGroup.Size = new System.Drawing.Size(194, 41);
+            this._matchAgainstGroup.TabIndex = 25;
+            this._matchAgainstGroup.TabStop = false;
+            this._matchAgainstGroup.Text = "Match Target Using";
+            // 
+            // _matchDirectory
+            // 
+            this._matchDirectory.AutoSize = true;
+            this._matchDirectory.Location = new System.Drawing.Point(82, 18);
+            this._matchDirectory.Name = "_matchDirectory";
+            this._matchDirectory.Size = new System.Drawing.Size(98, 17);
+            this._matchDirectory.TabIndex = 24;
+            this._matchDirectory.TabStop = true;
+            this._matchDirectory.Text = "Directory Name";
+            this._matchDirectory.UseVisualStyleBackColor = true;
+            this._matchDirectory.CheckedChanged += new System.EventHandler(this._match_CheckedChanged);
+            // 
+            // _matchFileName
+            // 
+            this._matchFileName.AutoSize = true;
+            this._matchFileName.Checked = true;
+            this._matchFileName.Location = new System.Drawing.Point(6, 18);
+            this._matchFileName.Name = "_matchFileName";
+            this._matchFileName.Size = new System.Drawing.Size(72, 17);
+            this._matchFileName.TabIndex = 22;
+            this._matchFileName.TabStop = true;
+            this._matchFileName.Text = "File Name";
+            this._matchFileName.UseVisualStyleBackColor = true;
+            this._matchFileName.CheckedChanged += new System.EventHandler(this._match_CheckedChanged);
+            // 
             // _overrideColumn
             // 
             this._overrideColumn.AutoSize = true;
-            this._overrideColumn.Location = new System.Drawing.Point(374, 61);
+            this._overrideColumn.Location = new System.Drawing.Point(374, 108);
             this._overrideColumn.Name = "_overrideColumn";
             this._overrideColumn.Size = new System.Drawing.Size(104, 17);
             this._overrideColumn.TabIndex = 21;
@@ -128,7 +167,7 @@
             "_",
             "-",
             "."});
-            this._separator.Location = new System.Drawing.Point(311, 59);
+            this._separator.Location = new System.Drawing.Point(311, 106);
             this._separator.Name = "_separator";
             this._separator.Size = new System.Drawing.Size(38, 21);
             this._separator.TabIndex = 20;
@@ -137,7 +176,7 @@
             // _separatorLit
             // 
             this._separatorLit.AutoSize = true;
-            this._separatorLit.Location = new System.Drawing.Point(234, 62);
+            this._separatorLit.Location = new System.Drawing.Point(234, 109);
             this._separatorLit.Name = "_separatorLit";
             this._separatorLit.Size = new System.Drawing.Size(71, 13);
             this._separatorLit.TabIndex = 19;
@@ -146,7 +185,7 @@
             // _column
             // 
             this._column.Enabled = false;
-            this._column.Location = new System.Drawing.Point(487, 59);
+            this._column.Location = new System.Drawing.Point(487, 106);
             this._column.Name = "_column";
             this._column.Size = new System.Drawing.Size(161, 20);
             this._column.TabIndex = 17;
@@ -157,22 +196,13 @@
             this._searchMethod.Items.AddRange(new object[] {
             "Begins With",
             "Equals"});
-            this._searchMethod.Location = new System.Drawing.Point(75, 59);
+            this._searchMethod.Location = new System.Drawing.Point(75, 106);
             this._searchMethod.Name = "_searchMethod";
             this._searchMethod.Size = new System.Drawing.Size(153, 21);
             this._searchMethod.TabIndex = 16;
             this._searchMethod.Text = "Begins With";
             this._searchMethod.SelectedIndexChanged += new System.EventHandler(this._searchMethod_SelectedIndexChanged);
             this._searchMethod.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._searchMethod_KeyPress);
-            // 
-            // _fileLit
-            // 
-            this._fileLit.AutoSize = true;
-            this._fileLit.Location = new System.Drawing.Point(15, 62);
-            this._fileLit.Name = "_fileLit";
-            this._fileLit.Size = new System.Drawing.Size(54, 13);
-            this._fileLit.TabIndex = 15;
-            this._fileLit.Text = "File Name";
             // 
             // _maskLit
             // 
@@ -193,7 +223,7 @@
             // 
             // _attempt
             // 
-            this._attempt.Location = new System.Drawing.Point(387, 86);
+            this._attempt.Location = new System.Drawing.Point(387, 133);
             this._attempt.Name = "_attempt";
             this._attempt.Size = new System.Drawing.Size(150, 23);
             this._attempt.TabIndex = 12;
@@ -203,7 +233,7 @@
             // 
             // _preview
             // 
-            this._preview.Location = new System.Drawing.Point(231, 86);
+            this._preview.Location = new System.Drawing.Point(231, 133);
             this._preview.Name = "_preview";
             this._preview.Size = new System.Drawing.Size(150, 23);
             this._preview.TabIndex = 11;
@@ -219,11 +249,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this._previewGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._previewGrid.Location = new System.Drawing.Point(0, 115);
+            this._previewGrid.Location = new System.Drawing.Point(0, 162);
             this._previewGrid.Name = "_previewGrid";
             this._previewGrid.ReadOnly = true;
             this._previewGrid.ShowEditingIcon = false;
-            this._previewGrid.Size = new System.Drawing.Size(670, 312);
+            this._previewGrid.Size = new System.Drawing.Size(670, 265);
             this._previewGrid.TabIndex = 9;
             // 
             // _recursive
@@ -238,7 +268,7 @@
             // 
             // _attach
             // 
-            this._attach.Location = new System.Drawing.Point(75, 86);
+            this._attach.Location = new System.Drawing.Point(75, 133);
             this._attach.Name = "_attach";
             this._attach.Size = new System.Drawing.Size(150, 23);
             this._attach.TabIndex = 7;
@@ -275,7 +305,7 @@
             this._importSourceType.Name = "_importSourceType";
             this._importSourceType.Size = new System.Drawing.Size(153, 21);
             this._importSourceType.TabIndex = 4;
-            this._importSourceType.Text = "Items";
+            this._importSourceType.Text = "Item";
             this._importSourceType.SelectedIndexChanged += new System.EventHandler(this._importSourceType_SelectedIndexChanged);
             this._importSourceType.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._searchMethod_KeyPress);
             // 
@@ -326,7 +356,7 @@
             this._exportTab.Location = new System.Drawing.Point(4, 22);
             this._exportTab.Name = "_exportTab";
             this._exportTab.Padding = new System.Windows.Forms.Padding(3);
-            this._exportTab.Size = new System.Drawing.Size(670, 355);
+            this._exportTab.Size = new System.Drawing.Size(670, 430);
             this._exportTab.TabIndex = 2;
             this._exportTab.Text = "Bulk Export Files";
             this._exportTab.UseVisualStyleBackColor = true;
@@ -409,6 +439,8 @@
             this._tabs.ResumeLayout(false);
             this._importTab.ResumeLayout(false);
             this._importTab.PerformLayout();
+            this._matchAgainstGroup.ResumeLayout(false);
+            this._matchAgainstGroup.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this._previewGrid)).EndInit();
             this._exportTab.ResumeLayout(false);
             this._exportTab.PerformLayout();
@@ -445,9 +477,11 @@
         private System.Windows.Forms.TextBox _mask;
         private System.Windows.Forms.TextBox _column;
         private System.Windows.Forms.ComboBox _searchMethod;
-        private System.Windows.Forms.Label _fileLit;
         private System.Windows.Forms.ComboBox _separator;
         private System.Windows.Forms.Label _separatorLit;
         private System.Windows.Forms.CheckBox _overrideColumn;
+        private System.Windows.Forms.GroupBox _matchAgainstGroup;
+        private System.Windows.Forms.RadioButton _matchDirectory;
+        private System.Windows.Forms.RadioButton _matchFileName;
     }
 }

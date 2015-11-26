@@ -37,7 +37,7 @@ namespace xtfileimporter
                 MessageBox.Show("Please completely fill out server information before continuing");
                 return null;
             }
-            return String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};",
+            return String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};ApplicationName=xtfileimporter",
                                  _server.Text, _port.Text, _user.Text, _password.Text, _database.Text);
         }
         /// <summary>
@@ -128,10 +128,14 @@ namespace xtfileimporter
             {
                 NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
                 conn.Open();
+                NpgsqlCommand cmd = new NpgsqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "SELECT login(true);";
+                cmd.ExecuteScalar();
                 main mainForm = new main(conn);
                 this.Hide();
                 mainForm.ShowDialog();
-                conn.Close();                 
+                conn.Close();
             }
             catch (Exception ex)
             {

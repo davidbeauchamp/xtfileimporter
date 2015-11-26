@@ -32,39 +32,13 @@ namespace xtfileimporter
         // string that gets built and displayed at the end of the run
         string output = String.Empty;
 
-        #region type map
-        //// this whole thing is made useless by the source table expanded in v4.9.0 of xTuple. I will be replacing this with that table soon
-        /// <summary>
-        /// Array of supported document types
-        /// </summary>
-        /// <para>Multidimensional array of supported document types. 
-        /// Columns are:
-        /// 0: Document  
-        /// 1: Document Type Abbreviation
-        /// 2: Query to retrieve source id given the document number
-        /// </para> 
-        string[,] types = new string[,] { {"Items",         "I",        "SELECT item_id     FROM item       WHERE UPPER({0})  = :source_number;", "item_number",         "item"},
-                                          {"CRMAccounts",   "CRMA",     "SELECT crmacct_id  FROM crmacct    WHERE UPPER({0})  = :source_number;", "crmacct_number",      "crmacct"},
-                                          {"SalesOrder",    "S",        "SELECT cohead_id   FROM cohead     WHERE UPPER({0})  = :source_number;", "cohead_number",       "cohead"},
-                                          {"LotSerial",     "LS",       "SELECT ls_id       FROM ls         WHERE UPPER({0})  = :source_number;", "ls_number",           "ls"},
-                                          {"WorkOrder",     "W",        "SELECT wo_id       FROM wo         WHERE UPPER({0})  = :source_number;", "wo_number::text || '-' || wo_subnumber::text",     "wo"},
-                                          {"PurchaseOrder", "P",        "SELECT pohead_id   FROM pohead     WHERE UPPER({0})  = :source_number;", "pohead_number",       "pohead"},
-                                          {"Vendor",        "V",        "SELECT vend_id     FROM vendinfo   WHERE UPPER({0})  = :source_number;", "vend_number",         "vendinfo"},
-                                          {"Contacts",      "T",        "SELECT cntct_id    FROM cntct      WHERE UPPER({0})  = :source_number;", "cntct_number",        "cntct"},
-                                          {"Invoice",       "INV",      "SELECT invchead_id FROM invchead   WHERE UPPER({0})  = :source_number;", "invchead_invcnumber", "invchead"},
-                                          {"Project",       "J",        "SELECT prj_id      FROM prj        WHERE UPPER({0})  = :source_number;", "prj_number",          "prj"},
-                                          {"Quote",         "Q",        "SELECT quhead_id   FROM quhead     WHERE UPPER({0})  = :source_number;", "quhead_number",       "quhead"},
-                                          {"Incident",      "INCDT",    "SELECT vend_id     FROM vendinfo   WHERE UPPER({0})  = :source_number;", "vend_number",         "vendinfo"}
-        };
+        string[,] types;
 
         // these constants represent the columns in the above types array
         int SOURCE = 0,
             SOURCETYPE = 1,
             SOURCEQUERY = 2,
-            SOURCECOLUMN = 3,
-            SOURCETABLE = 4;
-
-        #endregion
+            SOURCECOLUMN = 3;
 
         /// <summary>
         /// Main entry point
@@ -166,13 +140,33 @@ namespace xtfileimporter
         /// <returns>void</returns>
         private void addTypeChoices()
         {
-            for (int i = 0; i < types.GetLength(0); i += 1 )
+            string sourceQuery = " SELECT * FROM source "
+                                +" WHERE source_docass IS NOT NULL"
+                                +" ORDER BY source_descrip ASC;";
+            DataTable sources = new DataTable();
+            NpgsqlDataAdapter da = new NpgsqlDataAdapter(sourceQuery, conn);
+            da.Fill(sources);
+            int count = 0;
+            if (sources.Rows.Count > 0)
             {
-                _importSourceType.Items.Add(types[i, SOURCE]);
-                _extractSourceType.Items.Add(types[i, SOURCE]);
+                types = new string[sources.Rows.Count, 4];
             }
+            else { return; }
+
+            foreach (DataRow row in sources.Rows)
+            {
+                types[count, SOURCE] = row["source_descrip"].ToString();
+                types[count, SOURCETYPE] = row["source_docass"].ToString();
+                types[count, SOURCEQUERY] = "SELECT " + row["source_key_field"].ToString() + ", " + row["source_number_field"].ToString() + " FROM " + row["source_table"].ToString() + " " + row["source_joins"] + " WHERE UPPER({0}) = :source_number;";
+                types[count, SOURCECOLUMN] = row["source_number_field"].ToString();
+                _importSourceType.Items.Add(row["source_descrip"].ToString());
+                _extractSourceType.Items.Add(row["source_descrip"].ToString());
+                count += 1;
+            }
+            
             _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
         }
+
         private void loadSettings()
         {
             // window location
@@ -297,7 +291,6 @@ namespace xtfileimporter
             Int32 target_id = 0;
             Int32 source_id = 0;
 
-            //NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
             if (saveToDb)
             {
                 insertSourceQuery = "INSERT INTO file (file_title, file_stream, file_descrip) VALUES (:file_title, :file_stream, :file_descrip) RETURNING file_id;";
@@ -326,7 +319,6 @@ namespace xtfileimporter
                     progress progress = new progress();
                     progress.setMaxValue(filesFound.Length);
                     progress.Show();
-                    //conn.Open();
 
                     NpgsqlCommand command = new NpgsqlCommand(insertSourceQuery, conn);
                     if (saveToDb)
@@ -361,7 +353,6 @@ namespace xtfileimporter
                         {
                             Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
                             string[] matches = regex.Split(Path.GetFileNameWithoutExtension(file).ToUpper());
-                            //Match match = regex.Match(row["fileName"].ToString());
                             if (matches.Length > 0)
                             {
                                 sourceNumber = matches[0].ToUpper();
@@ -446,6 +437,11 @@ namespace xtfileimporter
             e.KeyChar = (char)Keys.None;
         }
 
+        private void _match_CheckedChanged(object sender, EventArgs e)
+        {
+            _recursive.Checked = _matchDirectory.Checked;
+        }
+
         /// <summary>
         /// Method to extract files from an xTuple database for chosen sourceType
         /// </summary>
@@ -461,7 +457,6 @@ namespace xtfileimporter
                                             +" WHERE docass_source_type = '{0}';", sourceType);
             
             DataTable filesToExtract = new DataTable();
-            //NpgsqlConnection conn = new NpgsqlConnection(getConnectionString());
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(fileQuery, conn);
 
             try
@@ -568,7 +563,6 @@ namespace xtfileimporter
                         {
                             Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
                             string[] matches = regex.Split(row["fileNameNoExt"].ToString());
-                            //Match match = regex.Match(row["fileName"].ToString());
                             if (matches.Length > 0)
                             {
                                 sourceNumber = matches[0].ToUpper();
