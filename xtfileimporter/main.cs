@@ -22,7 +22,7 @@ namespace xtfileimporter
         string outputpath = String.Empty;
         string inputpath = String.Empty;
         string mode = String.Empty;
-        //bool headless = false;
+        
         //bool recursive = false;
         NpgsqlConnection conn;
         #endregion
@@ -38,7 +38,8 @@ namespace xtfileimporter
         int SOURCE = 0,
             SOURCETYPE = 1,
             SOURCEQUERY = 2,
-            SOURCECOLUMN = 3;
+            SOURCECOLUMN = 3, 
+            SOURCETABLE = 4;
 
         /// <summary>
         /// Main entry point
@@ -150,7 +151,7 @@ namespace xtfileimporter
             int count = 0;
             if (sources.Rows.Count > 0)
             {
-                types = new string[sources.Rows.Count, 4];
+                types = new string[sources.Rows.Count, 5];
             }
             else { return; }
 
@@ -160,6 +161,7 @@ namespace xtfileimporter
                 types[count, SOURCETYPE] = row["source_docass"].ToString();
                 types[count, SOURCEQUERY] = "SELECT " + row["source_key_field"].ToString() + ", " + row["source_number_field"].ToString() + " FROM " + row["source_table"].ToString() + " " + row["source_joins"] + " WHERE UPPER({0}) = :source_number;";
                 types[count, SOURCECOLUMN] = row["source_number_field"].ToString();
+                types[count, SOURCETABLE] = row["source_table"].ToString();
                 _importSourceType.Items.Add(row["source_descrip"].ToString());
                 _extractSourceType.Items.Add(row["source_descrip"].ToString());
                 count += 1;
@@ -202,7 +204,6 @@ namespace xtfileimporter
         #endregion
 
         #region event handlers
-
         private void main_Load(object sender, EventArgs e)
         {
             this.Text = "xtfileimporter " + AssemblyInfo.Version;
@@ -272,7 +273,39 @@ namespace xtfileimporter
                 _outputPath.Text = fd.SelectedPath;
             }
         }
+        private void _searchMethod_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _separator.Enabled = (_searchMethod.Text == "Begins With");
+            _separatorLit.Enabled = (_searchMethod.Text == "Begins With");
+        }
+        private void _overrideColumn_CheckedChanged(object sender, EventArgs e)
+        {
+            _column.Enabled = _overrideColumn.Checked;
+        }
+        private void _importSourceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DataTable columns = new DataTable();
 
+            string query = " SELECT column_name from information_schema.columns "
+                         + " WHERE table_name = :source_table "
+                         + " AND table_schema != 'api' "
+                         + " ORDER BY column_name ASC;";
+
+            NpgsqlCommand cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.Add(new NpgsqlParameter("source_table", NpgsqlDbType.Text));
+            cmd.Parameters["source_table"].Value = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETABLE];
+            columns.Load(cmd.ExecuteReader());
+            _column.Items.Clear();
+            foreach (DataRow row in columns.Rows)
+            {
+                _column.Items.Add(row["column_name"].ToString());
+            }
+            _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
+        }
+        private void _searchMethod_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = (char)Keys.None;
+        }
         #endregion
 
         #region main
@@ -382,7 +415,6 @@ namespace xtfileimporter
                         try
                         {
                             source_id = (Int32)sourceId.ExecuteScalar();
-                            if (attemptOnly) { output += "Successfully matched " + sourceNumber + " to id " + source_id + Environment.NewLine; }
                             row["sourceNumber"] = sourceNumber;
                         }
                         catch (NullReferenceException) {
@@ -429,27 +461,6 @@ namespace xtfileimporter
                     ol.Show();
                 }
             }
-        }
-
-        private void _searchMethod_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _separator.Enabled = (_searchMethod.Text == "Begins With");
-            _separatorLit.Enabled = (_searchMethod.Text == "Begins With");
-        }
-
-        private void _overrideColumn_CheckedChanged(object sender, EventArgs e)
-        {
-            _column.Enabled = _overrideColumn.Checked;
-        }
-
-        private void _importSourceType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
-        }
-
-        private void _searchMethod_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            e.KeyChar = (char)Keys.None;
         }
 
         /// <summary>

@@ -26,7 +26,6 @@
             this._overrideColumn = new System.Windows.Forms.CheckBox();
             this._separator = new System.Windows.Forms.ComboBox();
             this._separatorLit = new System.Windows.Forms.Label();
-            this._column = new System.Windows.Forms.TextBox();
             this._searchMethod = new System.Windows.Forms.ComboBox();
             this._maskLit = new System.Windows.Forms.Label();
             this._mask = new System.Windows.Forms.TextBox();
@@ -50,6 +49,7 @@
             this._outputPathLit = new System.Windows.Forms.Label();
             this._outputPath = new System.Windows.Forms.TextBox();
             this._outputPathChooser = new System.Windows.Forms.Button();
+            this._column = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -85,11 +85,11 @@
             // 
             // _importTab
             // 
+            this._importTab.Controls.Add(this._column);
             this._importTab.Controls.Add(this._matchAgainstGroup);
             this._importTab.Controls.Add(this._overrideColumn);
             this._importTab.Controls.Add(this._separator);
             this._importTab.Controls.Add(this._separatorLit);
-            this._importTab.Controls.Add(this._column);
             this._importTab.Controls.Add(this._searchMethod);
             this._importTab.Controls.Add(this._maskLit);
             this._importTab.Controls.Add(this._mask);
@@ -179,14 +179,6 @@
             this._separatorLit.Size = new System.Drawing.Size(71, 13);
             this._separatorLit.TabIndex = 19;
             this._separatorLit.Text = "Separated By";
-            // 
-            // _column
-            // 
-            this._column.Enabled = false;
-            this._column.Location = new System.Drawing.Point(487, 106);
-            this._column.Name = "_column";
-            this._column.Size = new System.Drawing.Size(161, 20);
-            this._column.TabIndex = 17;
             // 
             // _searchMethod
             // 
@@ -376,7 +368,7 @@
             this._extractSourceType.Name = "_extractSourceType";
             this._extractSourceType.Size = new System.Drawing.Size(153, 21);
             this._extractSourceType.TabIndex = 12;
-            this._extractSourceType.Text = "Items";
+            this._extractSourceType.Text = "Item";
             // 
             // _extract
             // 
@@ -422,6 +414,15 @@
             this._outputPathChooser.Text = "...";
             this._outputPathChooser.UseVisualStyleBackColor = true;
             this._outputPathChooser.Click += new System.EventHandler(this._outputPathChooser_Click);
+            // 
+            // _column
+            // 
+            this._column.Enabled = false;
+            this._column.FormattingEnabled = true;
+            this._column.Location = new System.Drawing.Point(484, 106);
+            this._column.Name = "_column";
+            this._column.Size = new System.Drawing.Size(145, 21);
+            this._column.TabIndex = 26;
             // 
             // main
             // 
@@ -473,7 +474,6 @@
         private System.Windows.Forms.Button _browseDirectory;
         private System.Windows.Forms.Label _maskLit;
         private System.Windows.Forms.TextBox _mask;
-        private System.Windows.Forms.TextBox _column;
         private System.Windows.Forms.ComboBox _searchMethod;
         private System.Windows.Forms.ComboBox _separator;
         private System.Windows.Forms.Label _separatorLit;
@@ -481,5 +481,6 @@
         private System.Windows.Forms.GroupBox _matchAgainstGroup;
         private System.Windows.Forms.RadioButton _matchDirectory;
         private System.Windows.Forms.RadioButton _matchFileName;
+        private System.Windows.Forms.ComboBox _column;
     }
 }

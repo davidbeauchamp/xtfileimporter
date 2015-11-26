@@ -16,6 +16,7 @@ namespace xtfileimporter
         string password = String.Empty;
         string database = String.Empty;
         string server = String.Empty;
+        bool headless = false;
         int port = 0;
 
         public login(string[] args)
@@ -24,6 +25,10 @@ namespace xtfileimporter
             if (args.Length > 0)
             {
                 processArguments(args);
+                if (headless)
+                {
+                    _login_Click(null, null);
+                }
             }
         }
         /// <summary>
@@ -90,7 +95,7 @@ namespace xtfileimporter
                     }
                     else if (s.ToLower().Contains("--headless"))
                     {
-                        // future
+                        this.headless = true;
                     }
                 }
             }
@@ -143,7 +148,7 @@ namespace xtfileimporter
             } 
             finally
             {
-                this.Close();
+                Environment.Exit(0);
             }
         }
     }
