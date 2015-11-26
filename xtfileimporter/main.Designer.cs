@@ -134,7 +134,6 @@
             this._matchDirectory.TabStop = true;
             this._matchDirectory.Text = "Directory Name";
             this._matchDirectory.UseVisualStyleBackColor = true;
-            this._matchDirectory.CheckedChanged += new System.EventHandler(this._match_CheckedChanged);
             // 
             // _matchFileName
             // 
@@ -147,7 +146,6 @@
             this._matchFileName.TabStop = true;
             this._matchFileName.Text = "File Name";
             this._matchFileName.UseVisualStyleBackColor = true;
-            this._matchFileName.CheckedChanged += new System.EventHandler(this._match_CheckedChanged);
             // 
             // _overrideColumn
             // 

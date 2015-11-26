@@ -22,8 +22,8 @@ namespace xtfileimporter
         string outputpath = String.Empty;
         string inputpath = String.Empty;
         string mode = String.Empty;
-        bool headless = false;
-        bool recursive = false;
+        //bool headless = false;
+        //bool recursive = false;
         NpgsqlConnection conn;
         #endregion
 
@@ -58,6 +58,7 @@ namespace xtfileimporter
                 files.Columns.Add(new DataColumn("fileName"));
                 files.Columns.Add(new DataColumn("fileNameNoExt"));
                 files.Columns.Add(new DataColumn("filePath"));
+                files.Columns.Add(new DataColumn("type"));
                 files.Columns.Add(new DataColumn("sourceNumber"));
             }
             catch (Exception e)
@@ -217,7 +218,7 @@ namespace xtfileimporter
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE]);
+                    attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE], false);
                 });
                 
             }).Start();
@@ -233,7 +234,7 @@ namespace xtfileimporter
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    attemptmatch();
+                    attachFiles(types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE], true);
                 });
 
             }).Start();
@@ -279,15 +280,15 @@ namespace xtfileimporter
         /// <summary>
         /// Method attach files to xTuple ERP documents for the chosen sourceType.
         /// </summary>
-        /// <param name="sourceType">string source type from documents.cpp in qt-client/widgets</param>
+        /// <param name="sourceType">string source type from source_docass in public.source table</param>
+        /// <param name="attemptOnly">boolean whether or not to actually insert the file or just attempt to match the id</param>
         /// <returns>void</returns>
-        private void attachFiles(string sourceType)
+        private void attachFiles(string sourceType, bool attemptOnly)
         {
             output = "Started " + DateTime.Now + Environment.NewLine;
-            string[] filesFound;
             string insertSourceQuery = "";
             bool saveToDb = _saveToDb.Checked;
-
+            previewFiles();
             Int32 target_id = 0;
             Int32 source_id = 0;
 
@@ -313,12 +314,16 @@ namespace xtfileimporter
                 else
                 {
 
-                    filesFound = Directory.GetFiles(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, 
-                                                    _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-
                     progress progress = new progress();
-                    progress.setMaxValue(filesFound.Length);
-                    progress.Show();
+                    if (files.Rows.Count > 0)
+                    {
+                        progress.setMaxValue(files.Rows.Count);
+                        progress.Show();
+                    }
+                    else
+                    {
+                        return;
+                    }
 
                     NpgsqlCommand command = new NpgsqlCommand(insertSourceQuery, conn);
                     if (saveToDb)
@@ -344,52 +349,59 @@ namespace xtfileimporter
 
                     NpgsqlCommand sourceId = getSourceCommand(conn);
                     
-                    foreach (string file in filesFound)
+                    foreach (DataRow row in files.Rows)
                     {
-                        progress.incremenet();
-
+                        if (row["type"].ToString() == "D")
+                        {
+                            continue;
+                        }
                         string sourceNumber = "";
+
                         if (_searchMethod.Text == "Begins With")
                         {
                             Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
-                            string[] matches = regex.Split(Path.GetFileNameWithoutExtension(file).ToUpper());
+                            string[] matches = regex.Split(row["fileNameNoExt"].ToString());
                             if (matches.Length > 0)
                             {
                                 sourceNumber = matches[0].ToUpper();
                             }
                             else
                             {
-                                // if we didn't get any matches, maybe the filename is the document number on its own
-                                sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                                sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
                             }
 
                         }
                         else if (_searchMethod.Text == "Equals")
                         {
-                            sourceNumber = Path.GetFileNameWithoutExtension(file).ToUpper();
+                            sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
                         }
 
-                        sourceId.Parameters["source_number"].Value = sourceNumber;
 
+                        sourceId.Parameters["source_number"].Value = sourceNumber;
+                        progress.incremenet();
                         try
                         {
                             source_id = (Int32)sourceId.ExecuteScalar();
+                            if (attemptOnly) { output += "Successfully matched " + sourceNumber + " to id " + source_id + Environment.NewLine; }
+                            row["sourceNumber"] = sourceNumber;
                         }
                         catch (NullReferenceException) {
                             output += "Match For Number " + sourceNumber + " not found. " + Environment.NewLine;
                             continue;
                         }
 
+                        if (attemptOnly) { continue; }
+
                         if (saveToDb)
                         {
-                            command.Parameters["file_title"].Value = Path.GetFileName(file);
-                            command.Parameters["file_descrip"].Value = Path.GetFileName(file);
-                            command.Parameters["file_stream"].Value = fileToByteArray(file);
+                            command.Parameters["file_title"].Value = row["fileName"].ToString();
+                            command.Parameters["file_descrip"].Value = row["fileName"].ToString();
+                            command.Parameters["file_stream"].Value = fileToByteArray(row["filePath"].ToString());
                         }
                         else
                         {
-                            command.Parameters["url_title"].Value = Path.GetFileName(file);
-                            command.Parameters["url_url"].Value = "file:" + Path.GetFullPath(file).Replace('\\', '/');
+                            command.Parameters["url_title"].Value = row["fileName"].ToString();
+                            command.Parameters["url_url"].Value = "file:" + row["filePath"].ToString().Replace('\\', '/');
                         }
 
                         target_id = (Int32)command.ExecuteScalar();
@@ -397,6 +409,7 @@ namespace xtfileimporter
                         docassCommand.Parameters["docass_source_id"].Value = source_id;
                         docassCommand.Parameters["docass_target_id"].Value = target_id;
                         docassCommand.ExecuteScalar();
+                        output += "Successfully uploaded " + row["filePath"].ToString() + Environment.NewLine;
                     }
                     progress.Close();
                 }
@@ -409,11 +422,13 @@ namespace xtfileimporter
             finally
             {
                 output += "Completed at " + DateTime.Now;
-                outputlog ol = new outputlog();
-                ol.setText(output);
-                ol.Show();
+                if (!attemptOnly)
+                {
+                    outputlog ol = new outputlog();
+                    ol.setText(output);
+                    ol.Show();
+                }
             }
-
         }
 
         private void _searchMethod_SelectedIndexChanged(object sender, EventArgs e)
@@ -435,11 +450,6 @@ namespace xtfileimporter
         private void _searchMethod_KeyPress(object sender, KeyPressEventArgs e)
         {
             e.KeyChar = (char)Keys.None;
-        }
-
-        private void _match_CheckedChanged(object sender, EventArgs e)
-        {
-            _recursive.Checked = _matchDirectory.Checked;
         }
 
         /// <summary>
@@ -516,91 +526,51 @@ namespace xtfileimporter
             }
             else
             {
-                filesFound = Directory.GetFiles(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-                foreach (string file in filesFound)
+                if (_matchFileName.Checked)
                 {
-                    DataRow row = files.NewRow();
-                    row["fileName"] = Path.GetFileName(file);
-                    row["fileNameNoExt"] = Path.GetFileNameWithoutExtension(file);
-                    row["filePath"] = Path.GetFullPath(file);
-                    files.Rows.Add(row);
-                }
-                _previewGrid.DataSource = files;
-            }
-        }
-
-        /// <summary>
-        /// Method to attempt matching the source document number from the preview grid to the document within xTuple
-        /// </summary>
-        /// <returns>void</returns>
-        private void attemptmatch()
-        {
-            previewFiles();
-            try
-            {
-                if (String.IsNullOrEmpty(_inputPath.Text))
-                {
-                    MessageBox.Show("Input path is empty");
-                    return;
-                }
-                else
-                {
-                    progress progress = new progress();
-
-                    NpgsqlCommand sourceId = getSourceCommand(conn);
-
-                    if (files.Rows.Count > 0)
+                    filesFound = Directory.GetFiles(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                    foreach (string file in filesFound)
                     {
-                        progress.setMaxValue(files.Rows.Count);
-                        progress.Show();
+                        DataRow row = files.NewRow();
+                        row["fileName"] = Path.GetFileName(file);
+                        row["fileNameNoExt"] = Path.GetFileNameWithoutExtension(file);
+                        row["filePath"] = Path.GetFullPath(file);
+                        row["type"] = "F";
+                        files.Rows.Add(row);
                     }
-
-                    foreach (DataRow row in files.Rows)
+                    _previewGrid.DataSource = files;
+                }
+                else if (_matchDirectory.Checked)
+                {
+                    filesFound = Directory.GetDirectories(_inputPath.Text, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, SearchOption.TopDirectoryOnly);
+                    foreach (string file in filesFound)
                     {
-                        string sourceNumber = "";
-
-                        if (_searchMethod.Text == "Begins With")
+                        Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
+                        string[] matches = regex.Split(Path.GetFileName(file));
+                        
+                        if (matches.Length == 0)
                         {
-                            Regex regex = new Regex(@"[" + (String.IsNullOrEmpty(_separator.Text) ? "_" : _separator.Text) + "]");
-                            string[] matches = regex.Split(row["fileNameNoExt"].ToString());
-                            if (matches.Length > 0)
-                            {
-                                sourceNumber = matches[0].ToUpper();
-                            }
-                            else
-                            {
-                                sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
-                            }
-
-                        }
-                        else if (_searchMethod.Text == "Equals") {
-                            sourceNumber = row["fileNameNoExt"].ToString().ToUpper();
-                        }
-
-                        sourceId.Parameters["source_number"].Value = sourceNumber;
-                        progress.incremenet();
-                        try
-                        {
-                            Int32 source_id = (Int32)sourceId.ExecuteScalar();
-                            row["sourceNumber"] = sourceNumber;
-                        }
-                        catch (Exception)
-                        {
-                            row["sourceNumber"] = null;
                             continue;
                         }
+                        DataRow row = files.NewRow();
+                        row["fileName"] = Path.GetFileName(file);
+                        row["fileNameNoExt"] = Path.GetFileNameWithoutExtension(file);
+                        row["filePath"] = Path.GetFullPath(file);
+                        row["type"] = "D";
+                        files.Rows.Add(row);
+                        string[] subFilesFound = Directory.GetFiles(file, String.IsNullOrEmpty(_mask.Text) ? "*.*" : _mask.Text, _recursive.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                        foreach (string subfile in subFilesFound)
+                        {
+                            DataRow subrow = files.NewRow();
+                            subrow["fileName"] = Path.GetFileName(subfile);
+                            subrow["fileNameNoExt"] = Path.GetFileName(file);
+                            subrow["filePath"] = Path.GetFullPath(subfile);
+                            subrow["type"] = "F";
+                            files.Rows.Add(subrow);
+                        }
+                        _previewGrid.DataSource = files;
                     }
-                    progress.Close();
                 }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            finally
-            {
-                files.AcceptChanges();
             }
         }
 
