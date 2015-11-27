@@ -27,17 +27,22 @@ Written for Windows in C#, using .NET 4.0. Tested fine under mono and Arch Linux
    * ~~BOM~~ Coming again soon
    * Incident
 
+#Version 1.0.0.32 / 2015-Nov-26 / Turkey Edition#
+-- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.32)
+
+-- Implemented issues [#1](https://github.com/davidbeauchamp/xtfileimporter/issues/1) / [#2](https://github.com/davidbeauchamp/xtfileimporter/issues/2) / [#3](https://github.com/davidbeauchamp/xtfileimporter/issues/3), now uses the source table for its DOCASS data, option to ignore duplicates and an option to match against the directory name instead of file name. 
+
+#Version 1.0.0.33+ Roadmap#
+-- Include headless mode
+
+#Older Releases#
+
 #Version 1.0.0.31 / 2015-Nov-25#
 -- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.31)
 
 -- Splitting login and connection to its own screen 
 
 -- Fixing column override matching behavior (needed to cast to UPPER())
-
-#Version 1.0.0.32+ Roadmap#
--- Include headless mode
-
-#Older Releases#
 
 #Version 1.0.0.30 / 2015-Nov-25#
 -- [Download link](https://github.com/davidbeauchamp/xtfileimporter/releases/tag/v1.0.0.30)
