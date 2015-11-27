@@ -49,7 +49,7 @@
             this._database.Location = new System.Drawing.Point(79, 112);
             this._database.Name = "_database";
             this._database.Size = new System.Drawing.Size(158, 20);
-            this._database.TabIndex = 3;
+            this._database.TabIndex = 4;
             // 
             // _portLit
             // 
@@ -131,7 +131,7 @@
             this._port.Location = new System.Drawing.Point(79, 86);
             this._port.Name = "_port";
             this._port.Size = new System.Drawing.Size(158, 20);
-            this._port.TabIndex = 4;
+            this._port.TabIndex = 3;
             this._port.Text = "5432";
             // 
             // _serverLit
@@ -171,6 +171,7 @@
             // 
             // login
             // 
+            this.AcceptButton = this._login;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(347, 146);
