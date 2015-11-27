@@ -64,8 +64,7 @@
             // 
             // _close
             // 
-            this._close.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this._close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this._close.Location = new System.Drawing.Point(194, 3);
             this._close.Name = "_close";
@@ -86,12 +85,12 @@
             this._clear.UseVisualStyleBackColor = true;
             this._clear.Click += new System.EventHandler(this._clear_Click);
             // 
-            // textBox1
+            // output
             // 
             this.output.Dock = System.Windows.Forms.DockStyle.Fill;
             this.output.Location = new System.Drawing.Point(3, 38);
             this.output.Multiline = true;
-            this.output.Name = "textBox1";
+            this.output.Name = "output";
             this.output.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.output.Size = new System.Drawing.Size(278, 221);
             this.output.TabIndex = 2;

@@ -20,6 +20,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this._tabs = new System.Windows.Forms.TabControl();
             this._importTab = new System.Windows.Forms.TabPage();
+            this._column = new System.Windows.Forms.ComboBox();
             this._matchAgainstGroup = new System.Windows.Forms.GroupBox();
             this._matchDirectory = new System.Windows.Forms.RadioButton();
             this._matchFileName = new System.Windows.Forms.RadioButton();
@@ -49,7 +50,7 @@
             this._outputPathLit = new System.Windows.Forms.Label();
             this._outputPath = new System.Windows.Forms.TextBox();
             this._outputPathChooser = new System.Windows.Forms.Button();
-            this._column = new System.Windows.Forms.ComboBox();
+            this._ignoreDuplicates = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -85,6 +86,7 @@
             // 
             // _importTab
             // 
+            this._importTab.Controls.Add(this._ignoreDuplicates);
             this._importTab.Controls.Add(this._column);
             this._importTab.Controls.Add(this._matchAgainstGroup);
             this._importTab.Controls.Add(this._overrideColumn);
@@ -112,6 +114,15 @@
             this._importTab.TabIndex = 0;
             this._importTab.Text = "Bulk Import Files";
             this._importTab.UseVisualStyleBackColor = true;
+            // 
+            // _column
+            // 
+            this._column.Enabled = false;
+            this._column.FormattingEnabled = true;
+            this._column.Location = new System.Drawing.Point(484, 106);
+            this._column.Name = "_column";
+            this._column.Size = new System.Drawing.Size(145, 21);
+            this._column.TabIndex = 26;
             // 
             // _matchAgainstGroup
             // 
@@ -415,14 +426,15 @@
             this._outputPathChooser.UseVisualStyleBackColor = true;
             this._outputPathChooser.Click += new System.EventHandler(this._outputPathChooser_Click);
             // 
-            // _column
+            // _ignoreDuplicates
             // 
-            this._column.Enabled = false;
-            this._column.FormattingEnabled = true;
-            this._column.Location = new System.Drawing.Point(484, 106);
-            this._column.Name = "_column";
-            this._column.Size = new System.Drawing.Size(145, 21);
-            this._column.TabIndex = 26;
+            this._ignoreDuplicates.AutoSize = true;
+            this._ignoreDuplicates.Location = new System.Drawing.Point(275, 77);
+            this._ignoreDuplicates.Name = "_ignoreDuplicates";
+            this._ignoreDuplicates.Size = new System.Drawing.Size(128, 17);
+            this._ignoreDuplicates.TabIndex = 27;
+            this._ignoreDuplicates.Text = "Ignore Duplicate Files";
+            this._ignoreDuplicates.UseVisualStyleBackColor = true;
             // 
             // main
             // 
@@ -482,5 +494,6 @@
         private System.Windows.Forms.RadioButton _matchDirectory;
         private System.Windows.Forms.RadioButton _matchFileName;
         private System.Windows.Forms.ComboBox _column;
+        private System.Windows.Forms.CheckBox _ignoreDuplicates;
     }
 }

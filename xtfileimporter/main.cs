@@ -168,8 +168,8 @@ namespace xtfileimporter
             }
             
             _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
+            _importSourceType_SelectedIndexChanged(this, null);
         }
-
         private void loadSettings()
         {
             // window location
@@ -281,6 +281,10 @@ namespace xtfileimporter
         private void _overrideColumn_CheckedChanged(object sender, EventArgs e)
         {
             _column.Enabled = _overrideColumn.Checked;
+            if (!_overrideColumn.Checked)
+            {
+               _column.Text = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCECOLUMN];
+            }
         }
         private void _importSourceType_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -419,6 +423,7 @@ namespace xtfileimporter
                         }
                         catch (NullReferenceException) {
                             output += "Match For Number " + sourceNumber + " not found. " + Environment.NewLine;
+                            Console.WriteLine("Match For Number " + sourceNumber + " not found. ");
                             continue;
                         }
 
@@ -426,12 +431,59 @@ namespace xtfileimporter
 
                         if (saveToDb)
                         {
+                            if (_ignoreDuplicates.Checked)
+                            {
+                                string checkQuery = " SELECT COUNT(*)::INTEGER "
+                                                  + " FROM docass "
+                                                  + " JOIN file ON docass_target_id = file_id "
+                                                  + " WHERE docass_source_id = :source_id "
+                                                  + " AND docass_source_type = :source_type "
+                                                  + " AND file_title = :file_name;";
+                                NpgsqlCommand checkCommand = new NpgsqlCommand(checkQuery, conn);
+                                checkCommand.Parameters.Add(new NpgsqlParameter("source_id", NpgsqlDbType.Integer));
+                                checkCommand.Parameters.Add(new NpgsqlParameter("source_type", NpgsqlDbType.Text));
+                                checkCommand.Parameters.Add(new NpgsqlParameter("file_name", NpgsqlDbType.Text));
+                                checkCommand.Parameters["source_id"].Value = source_id;
+                                checkCommand.Parameters["source_type"].Value = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE];
+                                checkCommand.Parameters["file_name"].Value = row["fileName"].ToString();
+
+                                Int32 count = (Int32)checkCommand.ExecuteScalar();
+                                if (count > 0)
+                                {
+                                    output += "Ignoring duplicate file " + row["filePath"].ToString() + " for " + row["sourceNumber"].ToString() + Environment.NewLine;
+                                    continue;
+                                }
+                            }
                             command.Parameters["file_title"].Value = row["fileName"].ToString();
                             command.Parameters["file_descrip"].Value = row["fileName"].ToString();
                             command.Parameters["file_stream"].Value = fileToByteArray(row["filePath"].ToString());
                         }
                         else
                         {
+                            if (_ignoreDuplicates.Checked)
+                            {
+                                string checkQuery = " SELECT COUNT(*)::INTEGER "
+                                                   + " FROM docass "
+                                                   + " JOIN urlinfo ON docass_target_id = url_id "
+                                                   + " WHERE docass_source_id = :source_id "
+                                                   + " AND docass_source_type = :source_type "
+                                                   + " AND url_title = :file_name;";
+                                NpgsqlCommand checkCommand = new NpgsqlCommand(checkQuery, conn);
+                                checkCommand.Parameters.Add(new NpgsqlParameter("source_id", NpgsqlDbType.Integer));
+                                checkCommand.Parameters.Add(new NpgsqlParameter("source_type", NpgsqlDbType.Text));
+                                checkCommand.Parameters.Add(new NpgsqlParameter("file_name", NpgsqlDbType.Text));
+                                checkCommand.Parameters["source_id"].Value = source_id;
+                                checkCommand.Parameters["source_type"].Value = types[_importSourceType.Items.IndexOf(_importSourceType.Text), SOURCETYPE];
+                                checkCommand.Parameters["file_name"].Value = row["fileName"].ToString();
+
+                                Int32 count = (Int32)checkCommand.ExecuteScalar();
+                                if (count > 0)
+                                {
+                                    output += "Ignoring duplicate file " + row["filePath"].ToString() + " for " + row["sourceNumber"].ToString() + Environment.NewLine;
+                                    continue;
+                                }
+                            }
+
                             command.Parameters["url_title"].Value = row["fileName"].ToString();
                             command.Parameters["url_url"].Value = "file:" + row["filePath"].ToString().Replace('\\', '/');
                         }
@@ -532,7 +584,7 @@ namespace xtfileimporter
 
             if (String.IsNullOrEmpty(_inputPath.Text))
             {
-                MessageBox.Show("Input path is empty");
+                MessageBox.Show("Input path is empty", "Error");
                 return;
             }
             else
