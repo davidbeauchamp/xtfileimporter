@@ -20,6 +20,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this._tabs = new System.Windows.Forms.TabControl();
             this._importTab = new System.Windows.Forms.TabPage();
+            this._ignoreDuplicates = new System.Windows.Forms.CheckBox();
             this._column = new System.Windows.Forms.ComboBox();
             this._matchAgainstGroup = new System.Windows.Forms.GroupBox();
             this._matchDirectory = new System.Windows.Forms.RadioButton();
@@ -50,7 +51,6 @@
             this._outputPathLit = new System.Windows.Forms.Label();
             this._outputPath = new System.Windows.Forms.TextBox();
             this._outputPathChooser = new System.Windows.Forms.Button();
-            this._ignoreDuplicates = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this._tabs.SuspendLayout();
             this._importTab.SuspendLayout();
@@ -114,6 +114,18 @@
             this._importTab.TabIndex = 0;
             this._importTab.Text = "Bulk Import Files";
             this._importTab.UseVisualStyleBackColor = true;
+            // 
+            // _ignoreDuplicates
+            // 
+            this._ignoreDuplicates.AutoSize = true;
+            this._ignoreDuplicates.Checked = true;
+            this._ignoreDuplicates.CheckState = System.Windows.Forms.CheckState.Checked;
+            this._ignoreDuplicates.Location = new System.Drawing.Point(275, 77);
+            this._ignoreDuplicates.Name = "_ignoreDuplicates";
+            this._ignoreDuplicates.Size = new System.Drawing.Size(128, 17);
+            this._ignoreDuplicates.TabIndex = 27;
+            this._ignoreDuplicates.Text = "Ignore Duplicate Files";
+            this._ignoreDuplicates.UseVisualStyleBackColor = true;
             // 
             // _column
             // 
@@ -425,16 +437,6 @@
             this._outputPathChooser.Text = "...";
             this._outputPathChooser.UseVisualStyleBackColor = true;
             this._outputPathChooser.Click += new System.EventHandler(this._outputPathChooser_Click);
-            // 
-            // _ignoreDuplicates
-            // 
-            this._ignoreDuplicates.AutoSize = true;
-            this._ignoreDuplicates.Location = new System.Drawing.Point(275, 77);
-            this._ignoreDuplicates.Name = "_ignoreDuplicates";
-            this._ignoreDuplicates.Size = new System.Drawing.Size(128, 17);
-            this._ignoreDuplicates.TabIndex = 27;
-            this._ignoreDuplicates.Text = "Ignore Duplicate Files";
-            this._ignoreDuplicates.UseVisualStyleBackColor = true;
             // 
             // main
             // 
