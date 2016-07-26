@@ -37,7 +37,7 @@ namespace xtfileimporter
         /// <returns>string</returns>
         private string getConnectionString()
         {
-            if (String.IsNullOrEmpty(_server.Text) || String.IsNullOrEmpty(_port.Text) || String.IsNullOrEmpty(_user.Text) || String.IsNullOrEmpty(_password.Text) || String.IsNullOrEmpty(_database.Text))
+            if (String.IsNullOrEmpty(_server.Text) || String.IsNullOrEmpty(_port.Text) || String.IsNullOrEmpty(_user.Text) ||  String.IsNullOrEmpty(_database.Text))
             {
                 MessageBox.Show("Please completely fill out server information before continuing");
                 return null;
